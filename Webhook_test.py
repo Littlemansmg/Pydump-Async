@@ -11,7 +11,7 @@ bot = commands.Bot(command_prefix = '*')
 
 @bot.event
 async def on_ready():
-    bot.change_presence(game=discord.Game(name='Type *help for help'))
+    await bot.change_presence(game=discord.Game(name='Type *help for help'))
 
 @bot.command(pass_context = True, name = 'get')
 async def getPosts(ctx, reddit, sort):
@@ -22,11 +22,11 @@ async def getPosts(ctx, reddit, sort):
         with urllib.request.urlopen(url) as post:
             data = json.loads(post.read().decode())
         img = data['data']['children'][0]['data']['url']
-        bot.send_message(destination, img)
+        await bot.say(img)
 
     except:
-        bot.send_message(destination, 'Sorry, can\'t get to that reddit or it doesn\'t exist.')
+        await bot.say('Sorry, can\'t get to that reddit or it doesn\'t exist.')
 
-    bot.send_message(destination, "complete!")
+    await bot.say("complete!")
 
 bot.run(token.strip())
