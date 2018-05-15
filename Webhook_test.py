@@ -14,7 +14,7 @@ async def on_ready():
     bot.change_presence(game=discord.Game(name='Type *help for help'))
 
 @bot.command(pass_context = True, name = 'get')
-async def getPosts(ctx, *, reddit, sort):
+async def getPosts(ctx, reddit, sort):
 
     url = f'https://www.reddit.com/r/{reddit}/{sort}/.json'
 
