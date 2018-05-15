@@ -16,7 +16,7 @@ async def on_ready():
 @bot.command(pass_context = True, name = 'get')
 async def getPosts(ctx, *, reddit, sort):
 
-    url = f'https://www.reddit.com/r/{reddit}/{sort.strip()}/.json'
+    url = f'https://www.reddit.com/r/{reddit}/{sort}/.json'
 
     try:
         with urllib.request.urlopen(url) as post:
