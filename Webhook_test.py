@@ -1,5 +1,5 @@
 import logging
-import aiohttp
+# import aiohttp
 import discord
 from discord.ext import commands
 import urllib.request, json
