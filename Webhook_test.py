@@ -27,4 +27,6 @@ async def getPosts(ctx, reddit, sort):
     except:
         bot.send_message(destination, 'Sorry, can\'t get to that reddit or it doesn\'t exist.')
 
+    bot.send_message(destination, "complete!")
+
 bot.run(token.strip())
