@@ -10,7 +10,7 @@ with open('token.txt') as token:
     token = token.readline()
 
 async def getposts():
-    destination = bot.get_channel('431217188410490893')
+    destination = discord.utils.get(bot.get_all_channels(), name = 'general')
     url = 'https://www.reddit.com/r/dankmemes/new/.json'
     posts = []
     now = dt.utcnow()
@@ -29,7 +29,7 @@ async def getposts():
                 images.append(x['url'])
 
         for image in images:
-            await bot.send_message(bot.get_channel(431217188410490893), image)
+            await bot.send_message(destination, image)
 
     except Exception as e:
         print(e)
