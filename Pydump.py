@@ -10,7 +10,7 @@ with open('token.txt') as token:
     token = token.readline()
 
 async def getposts():
-    destination = bot.get_channel(431217188410490893)
+    destination = bot.get_channel('431217188410490893')
     url = 'https://www.reddit.com/r/dankmemes/new/.json'
     posts = []
     now = dt.utcnow()
