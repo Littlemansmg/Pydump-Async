@@ -44,9 +44,9 @@ async def getposts():
                                                     "<reddit names>` to start watching so I can post!")
                 break
 
-            posts = []
-            images = []
             for reddit in reddits:
+                posts = []
+                images = []
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
 
                 try:
