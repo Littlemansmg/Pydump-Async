@@ -2,6 +2,7 @@ import logging
 import aiohttp
 import discord
 import asyncio
+from discord import server
 from discord.ext import commands
 from datetime import datetime as dt
 
@@ -32,7 +33,8 @@ async def getposts():
             )
 
             if not destination:
-                await bot.send_message(bot.get_guild(settings[id]['id']), "I don't have a default channel to post in!"
+                # bot.get_guild(
+                await bot.send_message(bot.get_server(settings[id]['id']), "I don't have a default channel to post in!"
                                                                 "please type `*default_channel` to set it!")
                 break
             reddits = list(settings[id]['watching'])
