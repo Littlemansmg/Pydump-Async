@@ -1,18 +1,12 @@
 import aiohttp
-import json
-import discord
 import asyncio
 from datetime import datetime as dt
-import time
 
 reddit = input('Name of subreddit. Ex. r/dankmemes: ')
 sort = input('Sorted by? New/Top/Hot: ')
 
-
-
-url = f'https://www.reddit.com/r/{reddit}/{sort.strip()}/.json'
-
 async def getpost():
+    url = f'https://www.reddit.com/r/{reddit}/{sort.strip()}/.json'
     posts = []
     now = dt.utcnow()
     images = []
