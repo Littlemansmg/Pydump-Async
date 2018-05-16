@@ -62,7 +62,7 @@ async def getposts():
                             images.append(x['url'])
 
                     for image in images:
-                        await bot.send_message(destination, image)
+                        await bot.send_message(destination, f'From r/{reddit} ' + image)
 
                 except Exception as e:
                     print(e)
