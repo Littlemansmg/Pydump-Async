@@ -2,6 +2,7 @@ import logging
 import aiohttp
 import discord
 import asyncio
+import json
 from discord import server
 from discord.ext import commands
 from datetime import datetime as dt
@@ -24,25 +25,25 @@ async def getposts():
 
     while True:
         now = dt.utcnow()
-        for id in settings:
+        for id in data:
 
             destination = discord.utils.get(
                 bot.get_all_channels(),
-                server__id = settings[id]['id'],
-                name = settings[id]['default_channel']
+                server__id = data[id]['id'],
+                name = data[id]['default_channel']
             )
 
-            if not destination:
-                # bot.get_guild(
-                Server = bot.get_guild(settings[id]['id'])
-                await bot.send_message(Server, "I don't have a default channel to post in!"
-                                                                "please type `*default_channel` to set it!")
-                break
+            # if not destination:
+            #     # bot.get_guild(
+            #     Server = bot.get_guild(settings[id]['id'])
+            #     await bot.send_message(Server, "I don't have a default channel to post in!"
+            #                                                     "please type `*default_channel` to set it!")
+            #     break
             reddits = list(settings[id]['watching'])
-            if not reddits:
-                await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
-                                                    "<reddit names>` to start watching so I can post!")
-                break
+            # if not reddits:
+            #     await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
+            #                                         "<reddit names>` to start watching so I can post!")
+            #     break
 
             for reddit in reddits:
                 posts = []
@@ -80,6 +81,10 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 if __name__ == '__main__':
+
+    with open('options.json', 'r') as file:
+        data = json.load(file)
+
     try:
         bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
