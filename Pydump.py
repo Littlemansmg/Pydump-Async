@@ -67,8 +67,6 @@ async def getposts():
                 for image in images:
                     await bot.send_message(destination, f'From r/{reddit} ' + image)
 
-
-
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
 
 bot = commands.Bot(command_prefix = '*')
