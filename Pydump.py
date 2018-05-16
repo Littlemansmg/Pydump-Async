@@ -13,7 +13,7 @@ async def getposts():
     await bot.wait_until_ready()
 
     destination = discord.utils.get(bot.get_all_channels(), name = 'general')
-    url = 'https://www.reddit.com/r/dankmemes/new/.json'
+    url = 'https://www.reddit.com/r/ironicsigns/new/.json'
     posts = []
     now = dt.utcnow()
     images = []
