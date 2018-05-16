@@ -29,7 +29,7 @@ async def getposts():
                 images.append(x['url'])
 
         for image in images:
-            await bot.send_message(destination, image)
+            await bot.send_message(bot.get_channel(431217188410490893), image)
 
     except Exception as e:
         print(e)
