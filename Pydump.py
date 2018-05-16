@@ -34,7 +34,8 @@ async def getposts():
 
             if not destination:
                 # bot.get_guild(
-                await bot.send_message(bot.get_server(int(settings[id]['id'])), "I don't have a default channel to post in!"
+                channel = server.Server.default_channel
+                await bot.send_message(channel, "I don't have a default channel to post in!"
                                                                 "please type `*default_channel` to set it!")
                 break
             reddits = list(settings[id]['watching'])
