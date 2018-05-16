@@ -19,6 +19,16 @@ settings = {
     }
 }
 
+async def find_channel(guild):
+    """
+    Finds a suitable guild channel for posting the
+    welcome message.
+    """
+    for c in guild.text_channels:
+        if not c.permissions_for(guild.me).send_messages:
+            continue
+        return c
+
 async def getposts():
     await bot.wait_until_ready()
 
@@ -34,8 +44,8 @@ async def getposts():
 
             if not destination:
                 # bot.get_guild(
-                channel = server.Server.default_channel
-                await bot.send_message(channel, "I don't have a default channel to post in!"
+                Server = bot.get_server(settings[id]['id'])
+                await bot.send_message(find_channel(Server), "I don't have a default channel to post in!"
                                                                 "please type `*default_channel` to set it!")
                 break
             reddits = list(settings[id]['watching'])
