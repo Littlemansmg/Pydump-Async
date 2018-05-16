@@ -10,6 +10,8 @@ with open('token.txt') as token:
     token = token.readline()
 
 async def getposts():
+    await bot.wait_until_ready()
+
     destination = discord.utils.get(bot.get_all_channels(), name = 'general')
     url = 'https://www.reddit.com/r/dankmemes/new/.json'
     posts = []
@@ -34,7 +36,7 @@ async def getposts():
     except Exception as e:
         print(e)
 
-    asyncio.sleep(300)
+    await asyncio.sleep(300)
 
 bot = commands.Bot(command_prefix = '*')
 
