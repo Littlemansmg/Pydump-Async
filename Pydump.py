@@ -13,7 +13,7 @@ settings = {
     '0': {
         'id': '431217188410490891',
         'create_channels': 0,
-        'default_channel': 'general',
+        'default_channel': '',
         'watching': ['memes', 'dankmemes', 'curledfeetsies']
     }
 }
@@ -22,17 +22,29 @@ async def getposts():
     await bot.wait_until_ready()
 
     while True:
+        now = dt.utcnow()
         for id in settings:
-            destination = discord.utils.get(
-                bot.get_all_channels(),
-                server__id = settings[id]['id'],
-                name = settings[id]['default_channel'])
+            try:
+                destination = discord.utils.get(
+                    bot.get_all_channels(),
+                    server__id = settings[id]['id'],
+                    name = settings[id]['default_channel']
+                )
+            except:
+                await bot.send_message(bot.get_guild(settings[id]['id']), "I don't have a default channel to post in!"
+                                                                    "please type `*default_channel` to set it!")
+                break
             reddits = list(settings[id]['watching'])
+            if not reddits:
+                await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
+                                                    "<reddit names>` to start watching so I can post!")
+                break
+
+            posts = []
+            images = []
             for reddit in reddits:
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
-                posts = []
-                now = dt.utcnow()
-                images = []
+
                 try:
                     with aiohttp.ClientSession() as session:
                         async with session.get(url) as resp:
