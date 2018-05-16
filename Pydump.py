@@ -30,7 +30,7 @@ async def getposts():
                     server__id = settings[id]['id'],
                     name = settings[id]['default_channel']
                 )
-            except:
+            except discord.DiscordException:
                 await bot.send_message(bot.get_guild(settings[id]['id']), "I don't have a default channel to post in!"
                                                                     "please type `*default_channel` to set it!")
                 break
