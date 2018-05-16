@@ -7,26 +7,16 @@ from discord import server
 from discord.ext import commands
 from datetime import datetime as dt
 
-with open('token.txt') as token:
-    token = token.readline()
-
-# settings
-settings = {
-    '0': {
-        'id': '431217188410490891',
-        'create_channels': 0,
-        'default_channel': 'general',
-        'watching': ['memes', 'dankmemes', 'curledfeetsies']
-    }
-}
-
 async def getposts():
+    """
+    This function is the task that gets reddit posts on a 5 minute timer.
+    """
     await bot.wait_until_ready()
 
     while True:
         now = dt.utcnow()
         for id in data:
-
+            # get default destination from json file
             destination = discord.utils.get(
                 bot.get_all_channels(),
                 server__id = data[id]['id'],
@@ -39,7 +29,8 @@ async def getposts():
             #     await bot.send_message(Server, "I don't have a default channel to post in!"
             #                                                     "please type `*default_channel` to set it!")
             #     break
-            reddits = list(settings[id]['watching'])
+            # reddits that the server is watching
+            reddits = list(data[id]['watching'])
             # if not reddits:
             #     await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
             #                                         "<reddit names>` to start watching so I can post!")
@@ -51,24 +42,34 @@ async def getposts():
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
 
                 try:
+                    # Try to open connection to reddit with async
                     with aiohttp.ClientSession() as session:
                         async with session.get(url) as resp:
-                            if resp.status == 200:
+                            if resp.status == 200: # 200 == good
                                 json = await resp.json()
                                 posts = json['data']['children']
+                                # puts each post into a dict that can be manipulated
                                 posts = list(map(lambda p: p['data'], posts))
-                    for x in posts:
-                        posttime = dt.utcfromtimestamp(x['created_utc'])
-                        if (((now - posttime).total_seconds()) / 300) <= 1:
-                            images.append(x['url'])
-
-                    for image in images:
-                        await bot.send_message(destination, f'From r/{reddit} ' + image)
 
                 except Exception as e:
                     print(e)
 
-        await asyncio.sleep(300)
+                for x in posts:
+                    posttime = dt.utcfromtimestamp(x['created_utc'])
+                    # if 300 can't go into total seconds difference once, it gets added to the list of urls
+                    if (((now - posttime).total_seconds()) / 300) <= 1:
+                        images.append(x['url'])
+
+                    if not images:
+                        await asyncio.sleep(1)
+                        break
+
+                for image in images:
+                    await bot.send_message(destination, f'From r/{reddit} ' + image)
+
+
+
+        await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
 
 bot = commands.Bot(command_prefix = '*')
 
@@ -81,10 +82,15 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 if __name__ == '__main__':
+    # get token
+    with open('token.txt') as token:
+        token = token.readline()
 
+    # get .json file
     with open('options.json', 'r', encoding='utf-8') as file:
         data = json.load(file)
 
+    # run bot/start loop
     try:
         bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
