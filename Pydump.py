@@ -24,15 +24,16 @@ async def getposts():
     while True:
         now = dt.utcnow()
         for id in settings:
-            try:
-                destination = discord.utils.get(
-                    bot.get_all_channels(),
-                    server__id = settings[id]['id'],
-                    name = settings[id]['default_channel']
-                )
-            except discord.DiscordException:
+
+            destination = discord.utils.get(
+                bot.get_all_channels(),
+                server__id = settings[id]['id'],
+                name = settings[id]['default_channel']
+            )
+
+            if not destination:
                 await bot.send_message(bot.get_guild(settings[id]['id']), "I don't have a default channel to post in!"
-                                                                    "please type `*default_channel` to set it!")
+                                                                "please type `*default_channel` to set it!")
                 break
             reddits = list(settings[id]['watching'])
             if not reddits:
