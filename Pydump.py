@@ -82,7 +82,7 @@ async def getPosts(ctx, reddit, sort):
 
 if __name__ == '__main__':
 
-    with open('options.json', 'r') as file:
+    with open('options.json', 'r', encoding='utf-8') as file:
         data = json.load(file)
 
     try:
