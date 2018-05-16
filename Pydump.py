@@ -2,6 +2,7 @@ import logging
 import aiohttp
 import discord
 import asyncio
+from discord import server
 from discord.ext import commands
 from datetime import datetime as dt
 
@@ -9,7 +10,7 @@ with open('token.txt') as token:
     token = token.readline()
 
 async def getposts():
-    destination = discord.utils.get(discord.Guild.channels, name = 'general')
+    destination = discord.utils.get(discord.Server.channels, name = 'general')
     url = 'https://www.reddit.com/r/dankmemes/new/.json'
     posts = []
     now = dt.utcnow()
