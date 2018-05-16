@@ -9,6 +9,7 @@ with open('token.txt') as token:
     token = token.readline()
 
 async def getposts():
+    destination = discord.utils.get(bot.get_all_channels(), name = 'general')
     url = 'https://www.reddit.com/r/dankmemes/new/.json'
     posts = []
     now = dt.utcnow()
@@ -26,7 +27,9 @@ async def getposts():
                 # if x['created_utc'] <= int(now) + 14100:
                 images.append(x['url'])
 
-        bot.send_message()
+        for image in images:
+            await bot.send_message(destination, image)
+            
     except Exception as e:
         print(e)
 
@@ -38,20 +41,20 @@ bot = commands.Bot(command_prefix = '*')
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type *help for help'))
 
-    data = {}
-    serverid = bot.guilds.id
-    for server in serverid:
-        data[server.id] = {
-            'default_channel': discord.utils.get(bot.get_all_channels(), server__id = server, name = 'general')
-        }
+    # data = {}
+    # serverid = bot.guilds.id
+    # for server in serverid:
+    #     data[server.id] = {
+    #         'default_channel': discord.utils.get(bot.get_all_channels(), server__id = server, name = 'general')
+    #     }
 
 @bot.command(pass_context = True, name = 'get')
 async def getPosts(ctx, reddit, sort):
     pass
 
 if __name__ == '__main__':
-    try:
-        with open('settings.json', 'a', encoding = 'utf-8') as file
+    # try:
+    #     with open('settings.json', 'a', encoding = 'utf-8') as file
     try:
         bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
