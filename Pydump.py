@@ -24,7 +24,7 @@ async def getposts():
     for id in settings:
         destination = discord.utils.get(
             bot.get_all_channels(),
-            server_id = settings[id]['id'],
+            server__id = settings[id]['id'],
             name = settings[id]['default_channel'])
         reddits = list(settings[id]['watching'])
         for reddit in reddits:
