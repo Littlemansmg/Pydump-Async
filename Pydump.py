@@ -89,6 +89,7 @@ async def getposts():
 
                 for image in images:
                     await bot.send_message(destination, f'From r/{reddit} ' + image)
+                    await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
 
         taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
@@ -103,6 +104,19 @@ async def on_ready():
 @bot.command(pass_context = True, name = 'get')
 async def getPosts(ctx, reddit, sort):
     pass
+
+@bot.group(pass_context = True, name = 'default')
+async def setDefaults(ctx):
+    if ctx.invoked_subcommand is None:
+        bot.say('No subcommands invoked.')
+        commandinfo(ctx)
+
+@setDefaults.command(pass_context = True, name = 'channel')
+async def defaultChannel(ctx, channel):
+    newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
+    await bot.say(f'Is {newchannel.name} correct?')
+
+    commandinfo(ctx)
 
 # ---------------------------Run-------------------------------------
 if __name__ == '__main__':
