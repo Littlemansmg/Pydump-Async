@@ -118,7 +118,7 @@ async def defaultChannel(ctx, channel):
     for server in data:
         sid = ctx.message.server.id
         if sid in server['id']:
-            data[server]['id']['defaultchannel'] = newchannel.name
+            data[server]['defaultchannel'] = newchannel.name
             break
         else:
             continue
