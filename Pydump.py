@@ -171,9 +171,9 @@ async def subscribe(ctx, subreddit):
 
                         else:
                             continue
-            else:
-                bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
-                        f'exists.')
+                else:
+                    bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
+                            f'exists.')
 
 
 # ---------------------------Run-------------------------------------
