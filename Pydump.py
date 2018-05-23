@@ -118,8 +118,8 @@ async def defaultChannel(ctx, channel):
     for server in data:
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
-            data[server]['defaultchannel'] = newchannel.name
-            await bot.say(f"default channel changed to {data[server]['defaultChannel']}")
+            data[server]['default_channel'] = newchannel.name
+            await bot.say(f"default channel changed to {data[server]['default_channel']}")
             break
         else:
             continue
