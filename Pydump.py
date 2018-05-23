@@ -160,7 +160,9 @@ async def subscribe(ctx, subreddit):
                     for server in data:
                         sid = ctx.message.server.id
                         if str(sid) == data[server]['id']:
-                            data[server]['watching'].append(subreddit)
+                            subs = data[server]['watching']
+                            subs.append(subreddit)
+                            data[server]['watching'] = subs
                             await bot.say(f'Subreddit: {subreddit} added!\n'
                                           f'You will notice this change when I scour reddit again.')
 
@@ -172,7 +174,7 @@ async def subscribe(ctx, subreddit):
                         else:
                             continue
                 else:
-                    bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
+                    await bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
                             f'exists.')
 
 
