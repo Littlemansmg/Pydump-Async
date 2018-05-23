@@ -39,11 +39,12 @@ async def getposts():
         now = dt.utcnow()
         for id in data:
             # get default destination from json file
-            destination = discord.utils.get(
-                bot.get_all_channels(),
-                server__id = data[id]['id'],
-                name = data[id]['default_channel']
-            )
+            destination = bot.get_channel(data[id]['default_channel'])
+            # destination = discord.utils.get(
+            #     bot.get_all_channels(),
+            #     server__id = data[id]['id'],
+            #     name = data[id]['default_channel']
+            # )
 
             # if not destination:
             #     # bot.get_guild(
@@ -57,6 +58,9 @@ async def getposts():
             #     await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
             #                                         "<reddit names>` to start watching so I can post!")
             #     break
+
+            if destination == None or reddits == None:
+                break
 
             for reddit in reddits:
                 posts = []
@@ -118,7 +122,7 @@ async def defaultChannel(ctx, channel):
     for server in data:
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
-            data[server]['default_channel'] = newchannel.name
+            data[server]['default_channel'] = newchannel.id
             await bot.say(f"default channel changed to {data[server]['default_channel']}")
             break
         else:
