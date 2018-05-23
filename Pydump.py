@@ -17,7 +17,7 @@ def commandinfo(ctx):
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Command Used; '
                  f'Server_id: {ctx.message.server.name} '
-                 f'Author_id: {ctx.message.author.id)} '
+                 f'Author_id: {ctx.message.author.id} '
                  f'Invoke: {ctx.message.content}')
 
 def taskcomplete():
