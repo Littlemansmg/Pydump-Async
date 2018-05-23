@@ -1,12 +1,34 @@
+"""
+
+"""
+
+# ---------------------------Imports---------------------------------
 import logging
 import aiohttp
 import discord
 import asyncio
 import json
-from discord import server
 from discord.ext import commands
 from datetime import datetime as dt
 
+# ---------------------------Logs------------------------------------
+
+def commandinfo(ctx):
+    now = dt.now().strftime('%m/%d %H:%M')
+    logging.info(f'{now} Command Used; '
+                 f'Server_id: {ctx.message.server.name} '
+                 f'Author_id: {str(ctx.author.id)} '
+                 f'Invoke: {ctx.message.content}')
+
+def taskcomplete():
+    now = dt.now().strftime('%m/%d %H:%M')
+    logging.info(f'{now} Task completed successfully!')
+
+def catchlog(exception):
+    now = dt.now().strftime('%m/%d %H:%M')
+    logging.info(f'{now} Exception Caught: {exception}')
+
+# ---------------------------Tasks-----------------------------------
 async def getposts():
     """
     This function is the task that gets reddit posts on a 5 minute timer.
@@ -52,7 +74,8 @@ async def getposts():
                                 posts = list(map(lambda p: p['data'], posts))
 
                 except Exception as e:
-                    print(e)
+                    catchlog(e)
+                    continue
 
                 for x in posts:
                     posttime = dt.utcfromtimestamp(x['created_utc'])
@@ -67,8 +90,10 @@ async def getposts():
                 for image in images:
                     await bot.send_message(destination, f'From r/{reddit} ' + image)
 
+        taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
 
+# ---------------------------Bot-------------------------------------
 bot = commands.Bot(command_prefix = '*')
 
 @bot.event
@@ -79,10 +104,15 @@ async def on_ready():
 async def getPosts(ctx, reddit, sort):
     pass
 
+# ---------------------------Run-------------------------------------
 if __name__ == '__main__':
     # get token
     with open('token.txt') as token:
         token = token.readline()
+
+    # Start Logging
+    logging.basicConfig(handlers=[logging.FileHandler('discord.log', 'a', 'utf-8')],
+                        level=logging.INFO)
 
     # get .json file
     with open('options.json', 'r', encoding='utf-8') as file:
@@ -93,4 +123,4 @@ if __name__ == '__main__':
         bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
-        print(f'start failed. Exception: {e}')
+        catchlog(e)
