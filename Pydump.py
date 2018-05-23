@@ -12,11 +12,17 @@ from discord.ext import commands
 from datetime import datetime as dt
 
 # ---------------------------Logs------------------------------------
-
 def commandinfo(ctx):
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Command Used; '
-                 f'Server_id: {ctx.message.server.name} '
+                 f'Server_id: {ctx.message.server.id} '
+                 f'Author_id: {ctx.message.author.id} '
+                 f'Invoke: {ctx.message.content}')
+
+def changedefault(ctx):
+    now = dt.now().strftime('%m/%d %H:%M')
+    logging.info(f'{now} Default Changed; '
+                 f'Server_id: {ctx.message.server.id} '
                  f'Author_id: {ctx.message.author.id} '
                  f'Invoke: {ctx.message.content}')
 
@@ -27,6 +33,12 @@ def taskcomplete():
 def catchlog(exception):
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Exception Caught: {exception}')
+
+# ---------------------------Checks----------------------------------
+def admin_check():
+    def predicate(ctx):
+        return ctx.message.author.server_permissions.administrator
+    return commands.check(predicate)
 
 # ---------------------------Tasks-----------------------------------
 async def getposts():
@@ -40,11 +52,6 @@ async def getposts():
         for id in data:
             # get default destination from json file
             destination = bot.get_channel(data[id]['default_channel'])
-            # destination = discord.utils.get(
-            #     bot.get_all_channels(),
-            #     server__id = data[id]['id'],
-            #     name = data[id]['default_channel']
-            # )
 
             # if not destination:
             #     # bot.get_guild(
@@ -110,12 +117,14 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 @bot.group(pass_context = True, name = 'default')
+@admin_check()
 async def setDefaults(ctx):
     if ctx.invoked_subcommand is None:
         bot.say('No subcommands invoked.')
         commandinfo(ctx)
 
 @setDefaults.command(pass_context = True, name = 'channel')
+@admin_check()
 async def defaultChannel(ctx, channel):
     newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
 
@@ -123,15 +132,18 @@ async def defaultChannel(ctx, channel):
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
             data[server]['default_channel'] = newchannel.id
-            await bot.say(f"default channel changed to {data[server]['default_channel']}")
+            await bot.say(f"default channel changed to #{newchannel.name}\n"
+                          f"You will notice this change when I scour reddit again.")
+
+            with open('options.json', 'w', encoding='utf-8') as f:
+                f.write(json.dumps(data))
+
             break
+
         else:
             continue
 
-    with open('options.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(data))
-
-    commandinfo(ctx)
+    changedefault(ctx)
 
 # ---------------------------Run-------------------------------------
 if __name__ == '__main__':
