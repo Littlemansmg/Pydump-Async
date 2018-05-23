@@ -17,7 +17,7 @@ def commandinfo(ctx):
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Command Used; '
                  f'Server_id: {ctx.message.server.name} '
-                 f'Author_id: {str(ctx.author.id)} '
+                 f'Author_id: {ctx.message.author.id)} '
                  f'Invoke: {ctx.message.content}')
 
 def taskcomplete():
@@ -114,7 +114,17 @@ async def setDefaults(ctx):
 @setDefaults.command(pass_context = True, name = 'channel')
 async def defaultChannel(ctx, channel):
     newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
-    await bot.say(f'Is {newchannel.name} correct?')
+
+    for server in data:
+        sid = ctx.guild.id
+        if sid in server['id']:
+            data[server]['id']['defaultchannel'] = newchannel.name
+            break
+        else:
+            continue
+
+    with open('options.json', 'w', encoding='utf-8') as f:
+        f.write(json.dumps(data))
 
     commandinfo(ctx)
 
