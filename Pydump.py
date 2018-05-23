@@ -116,7 +116,7 @@ async def defaultChannel(ctx, channel):
     newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
 
     for server in data:
-        sid = ctx.guild.id
+        sid = ctx.server.id
         if sid in server['id']:
             data[server]['id']['defaultchannel'] = newchannel.name
             break
