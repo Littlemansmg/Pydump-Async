@@ -145,6 +145,34 @@ async def defaultChannel(ctx, channel):
 
     changedefault(ctx)
 
+@bot.command(pass_context = True, name = 'sub')
+@admin_check()
+async def subscribe(ctx, subreddit):
+    url = f"https://www.reddit.com/r/{subreddit}/new/.json"
+
+        # Try to open connection to reddit with async
+    with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                for server in data:
+                    sid = ctx.message.server.id
+                    if str(sid) == data[server]['id']:
+                        data[server]['watching'].append(subreddit)
+                        await bot.say(f'Subreddit: {subreddit} added!\n'
+                                      f'You will notice this change when I scour reddit again.')
+
+                        with open('options.json', 'w', encoding='utf-8') as f:
+                            f.write(json.dumps(data))
+
+                        break
+
+                    else:
+                        continue
+            else:
+                bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
+                        f'exists.')
+
+
 # ---------------------------Run-------------------------------------
 if __name__ == '__main__':
     # get token
