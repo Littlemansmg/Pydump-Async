@@ -89,6 +89,8 @@ async def getposts():
                     catchlog(e)
                     continue
 
+                # posts[0]['over_18'] == True for nsfw reddits
+
                 for x in posts:
                     posttime = dt.utcfromtimestamp(x['created_utc'])
                     # if 300 can't go into total seconds difference once, it gets added to the list of urls
@@ -123,12 +125,15 @@ async def respcheck(url):
 
     return posts
 
-# ---------------------------Bot-------------------------------------
+# ---------------------------BOT-------------------------------------
 bot = commands.Bot(command_prefix = '*')
 
+# ---------------------------Events----------------------------------
 @bot.event
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type *help for help'))
+
+# -------------------------Commands----------------------------------
 
 @bot.command(pass_context = True, name = 'get')
 async def getPosts(ctx, reddit, sort):
@@ -182,10 +187,9 @@ async def subscribe(ctx, subreddit):
                 fmtjson.edit_json('options', data)
                 break
 
-            else:
-                await bot.say(f'Sorry, I can\'t reach {subreddit}. '
-                              f'Check your spelling or make sure that the reddit actually exists.')
-                continue
+    else:
+        await bot.say(f'Sorry, I can\'t reach {subreddit}. '
+                      f'Check your spelling or make sure that the reddit actually exists.')
 
 
 @bot.command(pass_context = True, name = 'unsub')
