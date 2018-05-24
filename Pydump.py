@@ -10,6 +10,7 @@ import asyncio
 import json
 from discord.ext import commands
 from datetime import datetime as dt
+import fmtjson
 
 # ---------------------------Logs------------------------------------
 def commandinfo(ctx):
@@ -166,8 +167,10 @@ async def subscribe(ctx, subreddit):
                             await bot.say(f'Subreddit: {subreddit} added!\n'
                                           f'You will notice this change when I scour reddit again.')
 
-                            with open('options.json', 'w', encoding='utf-8') as f:
-                                f.write(json.dumps(data))
+                            # with open('options.json', 'w', encoding='utf-8') as f:
+                            #     f.write(json.dumps(data))
+
+                            fmtjson.edit_json('options', data)
 
                             break
 
@@ -189,8 +192,10 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     # get .json file
-    with open('options.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    # with open('options.json', 'r', encoding='utf-8') as file:
+    #     data = json.load(file)
+
+    data = fmtjson.read_json('options')
 
     # run bot/start loop
     try:
