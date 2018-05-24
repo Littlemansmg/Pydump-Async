@@ -211,7 +211,7 @@ async def unsub(ctx, subreddit):
         else:
             continue
 
-@bot.command(pass_context = True, name = 'list subs')
+@bot.command(pass_context = True, name = 'listsubs')
 async def listsubs(ctx):
     for server in data:
         sid = ctx.message.server.id
