@@ -167,7 +167,7 @@ async def defaultChannel(ctx, channel):
 @admin_check()
 async def subscribe(ctx, subreddit):
     url = f"https://www.reddit.com/r/{subreddit}/new/.json"
-    posts = respcheck(url)
+    posts = await respcheck(url)
 
     if posts:
         for server in data:
@@ -232,10 +232,6 @@ if __name__ == '__main__':
     # Start Logging
     logging.basicConfig(handlers=[logging.FileHandler('discord.log', 'a', 'utf-8')],
                         level=logging.INFO)
-
-    # get .json file
-    # with open('options.json', 'r', encoding='utf-8') as file:
-    #     data = json.load(file)
 
     data = fmtjson.read_json('options')
 
