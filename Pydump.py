@@ -1,5 +1,9 @@
 """
+Pydump-Rewrite by Scott 'LittlemanSMG' Goes on 5/24/18 (not actual date, just the date I decided to make this part.
+Pydump is a bot that is used to send reddit posts to discord per server.
 
+Using Discord.py
+github www.github.com/littlemansmg/Pydump-rewrite
 """
 
 # ---------------------------Imports---------------------------------
@@ -46,27 +50,19 @@ async def getposts():
     """
     This function is the task that gets reddit posts on a 5 minute timer.
     """
+    # wait to run task till bot is ready.
     await bot.wait_until_ready()
 
     while True:
         now = dt.utcnow()
         for id in data:
-            # get default destination from json file
+            # get default posting channel from json file
             destination = bot.get_channel(data[id]['default_channel'])
 
-            # if not destination:
-            #     # bot.get_guild(
-            #     Server = bot.get_guild(settings[id]['id'])
-            #     await bot.send_message(Server, "I don't have a default channel to post in!"
-            #                                                     "please type `*default_channel` to set it!")
-            #     break
             # reddits that the server is watching
             reddits = list(data[id]['watching'])
-            # if not reddits:
-            #     await bot.send_message(destination, "I don't have any reddit's to watch! Please type `*subscribe "
-            #                                         "<reddit names>` to start watching so I can post!")
-            #     break
 
+            # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
                 break
 
@@ -89,6 +85,7 @@ async def getposts():
                     catchlog(e)
                     continue
 
+                # TODO: Check for NSFW posts.
                 # posts[0]['over_18'] == True for nsfw reddits
 
                 for x in posts:
@@ -101,6 +98,8 @@ async def getposts():
                         await asyncio.sleep(1)
                         break
 
+                # TODO: Function this to make easier if the bot is supposed to post in a specific channel
+                # TODO: Make all links post at the same time to avoid ratelimit?
                 for image in images:
                     await bot.send_message(destination, f'From r/{reddit} ' + image)
                     await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
@@ -112,6 +111,7 @@ async def getposts():
 async def respcheck(url):
     """
     used for checking if posts exist for *sub command(subscribe function)
+    This is only temporary till I can make it a more universal function.
     :param url:
     :return:
     """
@@ -133,33 +133,72 @@ bot = commands.Bot(command_prefix = '*')
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type *help for help'))
 
+@bot.event
+async def on_server_join(server):
+    """
+    When the bot joins a server, it will set defaults in the json file and pull all info it needs.
+    :param server:
+    :return:
+    """
+    pass
+
+'''
+@bot.event
+async def on_command_error(error, ctx)
+    pass
+    
+@bot.event
+async def on_command_completion(ctx)
+    """
+    This is pretty much just a logger when a command is used. 
+    """
+    pass
+'''
+
 # -------------------------Commands----------------------------------
 
-@bot.command(pass_context = True, name = 'get')
+@bot.command(pass_context = True, name = 'get', hidden = True)
 async def getPosts(ctx, reddit, sort):
+    """
+    I'm not sure what i'm using this command for. hidden for now.
+    :param ctx:
+    :param reddit:
+    :param sort:
+    :return:
+    """
     pass
 
 @bot.group(pass_context = True, name = 'default')
 @admin_check()
 async def setDefaults(ctx):
+    """
+    base command to call subcommands to set defaults for the server.
+    :param ctx:
+    :return:
+    """
     if ctx.invoked_subcommand is None:
-        bot.say('No subcommands invoked.')
+        await bot.say('No subcommands invoked.')
         commandinfo(ctx)
 
 @setDefaults.command(pass_context = True, name = 'channel')
 @admin_check()
 async def defaultChannel(ctx, channel):
+    """
+    set default channel
+    :param ctx:
+    :param channel:
+    :return:
+    """
     newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
 
     for server in data:
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
             data[server]['default_channel'] = newchannel.id
-            await bot.say(f"default channel changed to #{newchannel.name}\n"
+            await bot.say(f"default channel changed to {newchannel.mention}\n"
                           f"You will notice this change when I scour reddit again.")
 
-            with open('options.json', 'w', encoding='utf-8') as f:
-                f.write(json.dumps(data))
+            fmtjson.edit_json('options', data)
 
             break
 
@@ -171,6 +210,12 @@ async def defaultChannel(ctx, channel):
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, subreddit):
+    """
+    command to 'subscribe' to a subreddit. aka watch for new posts
+    :param ctx:
+    :param subreddit:
+    :return:
+    """
     url = f"https://www.reddit.com/r/{subreddit}/new/.json"
     posts = await respcheck(url)
 
@@ -187,6 +232,7 @@ async def subscribe(ctx, subreddit):
                 fmtjson.edit_json('options', data)
                 break
 
+    # TODO: Make reachable.
     else:
         await bot.say(f'Sorry, I can\'t reach {subreddit}. '
                       f'Check your spelling or make sure that the reddit actually exists.')
@@ -195,6 +241,12 @@ async def subscribe(ctx, subreddit):
 @bot.command(pass_context = True, name = 'unsub')
 @admin_check()
 async def unsub(ctx, subreddit):
+    """
+    unsubscribes from a specified subreddit. 
+    :param ctx:
+    :param subreddit:
+    :return:
+    """
     for server in data:
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
@@ -217,6 +269,11 @@ async def unsub(ctx, subreddit):
 
 @bot.command(pass_context = True, name = 'listsubs')
 async def listsubs(ctx):
+    """
+    shows a list of subreddits that the bot is watching for the server.
+    :param ctx:
+    :return:
+    """
     for server in data:
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
