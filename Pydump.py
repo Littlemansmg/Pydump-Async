@@ -106,6 +106,23 @@ async def getposts():
         taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
 
+# -------------------Other-Functions---------------------------------
+async def respcheck(url):
+    """
+    used for checking if posts exist for *sub command(subscribe function)
+    :param url:
+    :return:
+    """
+    # TODO: Make this work with getposts task.
+    posts = []
+    with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                json = await resp.json()
+                posts = json['data']['children']
+
+    return posts
+
 # ---------------------------Bot-------------------------------------
 bot = commands.Bot(command_prefix = '*')
 
@@ -150,36 +167,61 @@ async def defaultChannel(ctx, channel):
 @admin_check()
 async def subscribe(ctx, subreddit):
     url = f"https://www.reddit.com/r/{subreddit}/new/.json"
+    posts = respcheck(url)
 
-        # Try to open connection to reddit with async
-    with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                json = await resp.json()
-                posts = json['data']['children']
-                if posts:
-                    for server in data:
-                        sid = ctx.message.server.id
-                        if str(sid) == data[server]['id']:
-                            subs = data[server]['watching']
-                            subs.append(subreddit)
-                            data[server]['watching'] = subs
-                            await bot.say(f'Subreddit: {subreddit} added!\n'
-                                          f'You will notice this change when I scour reddit again.')
+    if posts:
+        for server in data:
+            sid = ctx.message.server.id
+            if str(sid) == data[server]['id']:
+                subs = data[server]['watching']
+                subs.append(subreddit)
+                data[server]['watching'] = subs
+                await bot.say(f'Subreddit: {subreddit} added!\n'
+                              f'You will notice this change when I scour reddit again.')
 
-                            # with open('options.json', 'w', encoding='utf-8') as f:
-                            #     f.write(json.dumps(data))
+                fmtjson.edit_json('options', data)
+                break
 
-                            fmtjson.edit_json('options', data)
+            else:
+                await bot.say(f'Sorry, I can\'t reach {subreddit}. '
+                              f'Check your spelling or make sure that the reddit actually exists.')
+                continue
 
-                            break
 
-                        else:
-                            continue
-                else:
-                    await bot.say(f'Sorry, I can\'t reach {subreddit}. Check your spelling or make sure that the reddit actually'
-                            f'exists.')
+@bot.command(pass_context = True, name = 'unsub')
+@admin_check()
+async def unsub(ctx, subreddit):
+    for server in data:
+        sid = ctx.message.server.id
+        if str(sid) == data[server]['id']:
+            subs = data[server]['watching']
+            if subreddit in subs:
+                subs.remove(subreddit)
+                data[server]['watching'] = subs
+                await bot.say(f'Subreddit: {subreddit} removed!\n'
+                              f'You will notice this change when I scour reddit again.')
+                fmtjson.edit_json('options', data)
+                break
 
+            else:
+                await bot.say(f'Subreddit: {subreddit} not found. Please make sure you are spelling'
+                              f' it correctly.')
+                break
+
+        else:
+            continue
+
+@bot.command(pass_context = True, name = 'list subs')
+async def listsubs(ctx):
+    for server in data:
+        sid = ctx.message.server.id
+        if str(sid) == data[server]['id']:
+            subs = data[server]['watching']
+            strsub = ''
+            for sub in subs:
+                strsub += f'r/{sub}\n'
+
+            await bot.say(f"This server is subbed to:\n{strsub}")
 
 # ---------------------------Run-------------------------------------
 if __name__ == '__main__':
