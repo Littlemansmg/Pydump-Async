@@ -150,7 +150,7 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = '*')
+bot = commands.Bot(command_prefix = 'r/')
 
 # ---------------------------Events----------------------------------
 @bot.event
@@ -161,6 +161,13 @@ async def on_ready():
 async def on_server_join(server):
     """
     When the bot joins a server, it will set defaults in the json file and pull all info it needs.
+
+    defaults:
+        default channel == ''
+        id == server id
+        nsfw filter == 1
+        create channels == 0
+        watching == []
     :param server:
     :return:
     """
