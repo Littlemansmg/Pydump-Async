@@ -67,7 +67,6 @@ async def getposts():
 
             # store channel creation option
             create = data[id]['create_channels']
-            await bot.send_message(destination, create)
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
@@ -102,9 +101,9 @@ async def getposts():
                         images.append(x['url'])
 
                     # I'm pretty sure this code does nothing.
-                    # if not images:
-                    #     await asyncio.sleep(1)
-                    #     break
+                    if not images:
+                        await asyncio.sleep(1)
+                        break
 
                 # TODO: Function this to make easier if the bot is supposed to post in a specific channel
                 # TODO: Make all links post at the same time to avoid ratelimit?
