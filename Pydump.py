@@ -62,9 +62,9 @@ async def getposts():
             # reddits that the server is watching
             reddits = list(data[id]['watching'])
 
-            # # store nsfw filter
-            # nsfwfilter = data[id]['NSFW_filter']
-            #
+            # store nsfw filter
+            nsfwfilter = data[id]['NSFW_filter']
+
             # store channel creation option
             create = data[id]['create_channel']
 
@@ -98,7 +98,13 @@ async def getposts():
                     posttime = dt.utcfromtimestamp(x['created_utc'])
                     # if 300 can't go into total seconds difference once, it gets added to the list of urls
                     if (((now - posttime).total_seconds()) / 300) <= 1:
-                        images.append(x['url'])
+                        if nsfwfilter == 1:
+                            if x['over_18'] == 'True':
+                                continue
+                            else:
+                                images.append(x['url'])
+                        else:
+                            images.append(x['url'])
 
                     # This skips to next reddit.
                     if not images:
@@ -110,7 +116,7 @@ async def getposts():
 
                 if create == 0 and images:
                     for image in images:
-                        await bot.send_message(destination, f'From r/{reddit} ' + image)
+                        await bot.send_message(destination, f'From r/{reddit} {image}')
                         await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
                 elif create == 1 and images:
                     sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
@@ -126,7 +132,7 @@ async def getposts():
                         # reassign's sendto so that it is no longer NoneType
                         sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
 
-                        await bot.send_message(sendto, '\n'.join(images))
+                    await bot.send_message(sendto, '\n'.join(images))
 
         taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
