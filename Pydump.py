@@ -251,7 +251,7 @@ async def nsfw_filter(ctx):
     for server in data:
         toggle = ctx.message.server.id
         if toggle == data[server]['id']:
-            if server['NSFW_filter'] == 1:
+            if data[server]['NSFW_filter'] == 1:
                 data[server]['NSFW_filter'] = 0
                 await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser.")
             else:
@@ -262,7 +262,7 @@ async def nsfw_filter(ctx):
             break
 
     changedefault(ctx)
-    
+
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, subreddit):
