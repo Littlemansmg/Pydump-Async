@@ -99,7 +99,7 @@ async def getposts():
                     # if 300 can't go into total seconds difference once, it gets added to the list of urls
                     if (((now - posttime).total_seconds()) / 300) <= 1:
                         if nsfwfilter == 1:
-                            if x['over_18'] == 'True':
+                            if x['over_18'] == True:
                                 continue
                             else:
                                 images.append(x['url'])
