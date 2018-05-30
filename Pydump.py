@@ -73,30 +73,12 @@ async def getposts():
                 break
 
             for reddit in reddits:
-                posts = []
                 images = []
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
-
                 posts = await respcheck(url)
 
                 if not posts:
                     continue
-                # try:
-                #     # Try to open connection to reddit with async
-                #     with aiohttp.ClientSession() as session:
-                #         async with session.get(url) as resp:
-                #             if resp.status == 200: # 200 == good
-                #                 json = await resp.json()
-                #                 posts = json['data']['children']
-                #                 # puts each post into a dict that can be manipulated
-                #                 posts = list(map(lambda p: p['data'], posts))
-                #
-                # except Exception as e:
-                #     catchlog(e)
-                #     continue
-
-                # TODO: Check for NSFW posts.
-                # posts[0]['over_18'] == True for nsfw reddits
 
                 for x in posts:
                     posttime = dt.utcfromtimestamp(x['created_utc'])
@@ -144,18 +126,16 @@ async def getposts():
 # -------------------Other-Functions---------------------------------
 async def respcheck(url):
     """
-    used for checking if posts exist for *sub command(subscribe function)
-    This is only temporary till I can make it a more universal function.
+    This function is used to open up the json file from reddit and get the posts.
+    It's used in:
+    getposts() - Task
+        will continue if no posts are found within 5 minutes
+    sub - command
+        will tell user if a connection has been made, or if a subreddit exists.
     :param url:
     :return:
     """
-    # TODO: Make this work with getposts task.
     posts = []
-    # with aiohttp.ClientSession() as session:
-    #     async with session.get(url) as resp:
-    #         if resp.status == 200:
-    #             json = await resp.json()
-    #             posts = json['data']['children']
     try:
         # Try to open connection to reddit with async
         with aiohttp.ClientSession() as session:
@@ -260,6 +240,29 @@ async def defaultChannel(ctx, channel):
 
     changedefault(ctx)
 
+@setDefaults.command(pass_context = True, name = 'nsfw')
+@admin_check()
+async def nsfw_filter(ctx):
+    '''
+    Toggles the NSFW filter. DEFAULT: ON
+    :param ctx:
+    :return:
+    '''
+    for server in data:
+        toggle = ctx.message.server.id
+        if toggle == data[server]['id']:
+            if server['NSFW_filter'] == 1:
+                data[server]['NSFW_filter'] = 0
+                await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser.")
+            else:
+                data[server]['NSFW_filter'] = 1
+                await bot.say("NSFW filter has been TURNED ON. I really don't like looking for those "
+                              "images.")
+            fmtjson.edit_json('options', data)
+            break
+
+    changedefault(ctx)
+    
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, subreddit):
