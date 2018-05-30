@@ -77,19 +77,23 @@ async def getposts():
                 images = []
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
 
-                try:
-                    # Try to open connection to reddit with async
-                    with aiohttp.ClientSession() as session:
-                        async with session.get(url) as resp:
-                            if resp.status == 200: # 200 == good
-                                json = await resp.json()
-                                posts = json['data']['children']
-                                # puts each post into a dict that can be manipulated
-                                posts = list(map(lambda p: p['data'], posts))
+                posts = await respcheck(url)
 
-                except Exception as e:
-                    catchlog(e)
+                if not posts:
                     continue
+                # try:
+                #     # Try to open connection to reddit with async
+                #     with aiohttp.ClientSession() as session:
+                #         async with session.get(url) as resp:
+                #             if resp.status == 200: # 200 == good
+                #                 json = await resp.json()
+                #                 posts = json['data']['children']
+                #                 # puts each post into a dict that can be manipulated
+                #                 posts = list(map(lambda p: p['data'], posts))
+                #
+                # except Exception as e:
+                #     catchlog(e)
+                #     continue
 
                 # TODO: Check for NSFW posts.
                 # posts[0]['over_18'] == True for nsfw reddits
@@ -147,11 +151,23 @@ async def respcheck(url):
     """
     # TODO: Make this work with getposts task.
     posts = []
-    with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                json = await resp.json()
-                posts = json['data']['children']
+    # with aiohttp.ClientSession() as session:
+    #     async with session.get(url) as resp:
+    #         if resp.status == 200:
+    #             json = await resp.json()
+    #             posts = json['data']['children']
+    try:
+        # Try to open connection to reddit with async
+        with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status == 200:  # 200 == good
+                    json = await resp.json()
+                    posts = json['data']['children']
+                    # puts each post into a dict that can be manipulated
+                    posts = list(map(lambda p: p['data'], posts))
+
+    except Exception as e:
+        catchlog(e)
 
     return posts
 
