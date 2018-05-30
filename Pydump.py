@@ -62,11 +62,11 @@ async def getposts():
             # reddits that the server is watching
             reddits = list(data[id]['watching'])
 
-            # store nsfw filter
-            nsfwfilter = data[id]['NSFW_filter']
-
-            # store channel creation option
-            create = data[id]['create_channels']
+            # # store nsfw filter
+            # nsfwfilter = data[id]['NSFW_filter']
+            #
+            # # store channel creation option
+            # create = data[id]['create_channels']
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
