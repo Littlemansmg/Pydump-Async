@@ -108,11 +108,11 @@ async def getposts():
                 # TODO: Function this to make easier if the bot is supposed to post in a specific channel
                 # TODO: Make all links post at the same time to avoid ratelimit?
 
-                if create == 0:
+                if create == "0":
                     for image in images:
                         await bot.send_message(destination, f'From r/{reddit} ' + image)
                         await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
-                elif create == 1:
+                elif create == "1":
                     for image in images:
                         sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
 
