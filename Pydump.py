@@ -112,29 +112,21 @@ async def getposts():
                     for image in images:
                         await bot.send_message(destination, f'From r/{reddit} ' + image)
                         await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
-                # elif create == "1":
-                #     for image in images:
-                #         sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
-                #
-                #         # If channel is not found, it applies NoneType. This statement creates the channel.
-                #         # The sleep is required because if the bot goes too fast, it can't find the channel,
-                #         # even though it exists.
-                #         # $
-                #         # Try discord.utils.get() to find the server.
-                #         if sendto is None:
-                #             try:
-                #                 await bot.create_channel(bot.get_server(data[id]['id']),
-                #                                             name=str(reddit),
-                #                                             type=discord.ChannelType.text)
-                #             except Exception as e:
-                #                 catchlog(e)
-                #                 break
-                #             await asyncio.sleep(5)
-                #             # reassign's sendto so that it is no longer NoneType
-                #             sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
-                #
-                #         await bot.send_message(sendto, image)
+                elif create == 1:
+                    sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
 
+                    # If channel is not found, it applies NoneType. This statement creates the channel.
+                    # The sleep is required because if the bot goes too fast, it can't find the channel,
+                    # even though it exists.
+                    if sendto is None:
+                        await bot.create_channel(bot.get_server(data[id]['id']),
+                                                     name=str(reddit),
+                                                     type=discord.ChannelType.text)
+                        await asyncio.sleep(5)
+                        # reassign's sendto so that it is no longer NoneType
+                        sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
+
+                        await bot.send_message(sendto, '\n'.join(images))
 
         taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
