@@ -67,7 +67,7 @@ async def getposts():
 
             # store channel creation option
             create = data[id]['create_channels']
-            print(create)
+            await bot.send_message(destination, create)
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
