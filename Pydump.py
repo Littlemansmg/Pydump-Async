@@ -66,7 +66,7 @@ async def getposts():
             # nsfwfilter = data[id]['NSFW_filter']
             #
             # store channel creation option
-            create = data[id]['create_channels']
+            create = data[id]['create_channel']
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
