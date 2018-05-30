@@ -100,10 +100,13 @@ async def getposts():
                     if (((now - posttime).total_seconds()) / 300) <= 1:
                         images.append(x['url'])
 
-                # This skips to next reddit.
+                    # This skips to next reddit.
+                    if not images:
+                        await asyncio.sleep(1)
+                        break
+
                 if not images:
-                    await asyncio.sleep(1)
-                    break
+                    continue
 
                 # TODO: Function this to make easier if the bot is supposed to post in a specific channel
                 # TODO: Make all links post at the same time to avoid ratelimit?
