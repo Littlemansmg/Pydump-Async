@@ -122,9 +122,13 @@ async def getposts():
                         # $
                         # Try discord.utils.get() to find the server.
                         if sendto is None:
-                            await bot.create_channel(bot.get_server(data[id]['id']),
-                                                        name=str(reddit),
-                                                        type=discord.ChannelType.text)
+                            try:
+                                await bot.create_channel(bot.get_server(data[id]['id']),
+                                                            name=str(reddit),
+                                                            type=discord.ChannelType.text)
+                            except Exception as e:
+                                catchlog(e)
+                                break
                             await asyncio.sleep(5)
                             # reassign's sendto so that it is no longer NoneType
                             sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
