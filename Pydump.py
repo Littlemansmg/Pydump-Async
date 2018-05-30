@@ -65,8 +65,8 @@ async def getposts():
             # # store nsfw filter
             # nsfwfilter = data[id]['NSFW_filter']
             #
-            # # store channel creation option
-            # create = data[id]['create_channels']
+            # store channel creation option
+            create = data[id]['create_channels']
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None or reddits == None:
@@ -108,10 +108,10 @@ async def getposts():
                 # TODO: Function this to make easier if the bot is supposed to post in a specific channel
                 # TODO: Make all links post at the same time to avoid ratelimit?
 
-                # if create == "0":
-                for image in images:
-                    await bot.send_message(destination, f'From r/{reddit} ' + image)
-                    await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
+                if create == 0:
+                    for image in images:
+                        await bot.send_message(destination, f'From r/{reddit} ' + image)
+                        await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
                 # elif create == "1":
                 #     for image in images:
                 #         sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
