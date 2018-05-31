@@ -19,14 +19,14 @@ import fmtjson
 # ---------------------------Logs------------------------------------
 def commandinfo(ctx):
     now = dt.now().strftime('%m/%d %H:%M')
-    logging.info(f'{now} Command Used; '
+    logging.info(f'{now} COMMAND USED; '
                  f'Server_id: {ctx.message.server.id} '
                  f'Author_id: {ctx.message.author.id} '
                  f'Invoke: {ctx.message.content}')
 
 def changedefault(ctx):
     now = dt.now().strftime('%m/%d %H:%M')
-    logging.info(f'{now} Default Changed; '
+    logging.info(f'{now} DEFAULT CHANGED; '
                  f'Server_id: {ctx.message.server.id} '
                  f'Author_id: {ctx.message.author.id} '
                  f'Invoke: {ctx.message.content}')
@@ -37,7 +37,7 @@ def taskcomplete():
 
 def catchlog(exception):
     now = dt.now().strftime('%m/%d %H:%M')
-    logging.info(f'{now} Exception Caught: {exception}')
+    logging.info(f'{now} EXCEPTION CAUGHT: {exception}')
 
 # ---------------------------Checks----------------------------------
 def admin_check():
@@ -157,7 +157,7 @@ bot = commands.Bot(command_prefix = 'r/')
 # ---------------------------Events----------------------------------
 @bot.event
 async def on_ready():
-    await bot.change_presence(game=discord.Game(name='Type *help for help'))
+    await bot.change_presence(game=discord.Game(name='Type r/help for help'))
 
 @bot.event
 async def on_server_join(server):
@@ -222,9 +222,10 @@ async def defaultChannel(ctx, channel):
     :param channel:
     :return:
     """
-    newchannel = discord.utils.get(bot.get_all_channels(), name = channel)
+    newchannel = discord.utils.get(bot.get_all_channels(), name = channel, server__id = ctx.message.server.id)
 
     for server in data:
+
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
             data[server]['default_channel'] = newchannel.id
@@ -242,7 +243,7 @@ async def defaultChannel(ctx, channel):
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
 @admin_check()
-async def nsfw_filter(ctx):
+async def nsfwFilter(ctx):
     '''
     Toggles the NSFW filter. DEFAULT: ON
     :param ctx:
@@ -258,6 +259,30 @@ async def nsfw_filter(ctx):
                 data[server]['NSFW_filter'] = 1
                 await bot.say("NSFW filter has been TURNED ON. I really don't like looking for those "
                               "images.")
+            fmtjson.edit_json('options', data)
+            break
+
+    changedefault(ctx)
+
+@setDefaults.command(pass_context = True, name = 'create')
+@admin_check()
+async def createChannels(ctx):
+    '''
+    Toggles the NSFW filter. DEFAULT: ON
+    :param ctx:
+    :return:
+    '''
+    for server in data:
+        toggle = ctx.message.server.id
+        if toggle == data[server]['id']:
+            if data[server]['create_channels'] == 1:
+                data[server]['create_channels'] = 0
+                await bot.say("Creating channels has been TURNED OFF. I will now make all of my posts in "
+                              "your default channel.")
+            else:
+                data[server]['create_channels'] = 1
+                await bot.say("Creating channels has been TURNED ON. I can now create channels for each reddit "
+                              "that you are watching.")
             fmtjson.edit_json('options', data)
             break
 
@@ -349,8 +374,10 @@ if __name__ == '__main__':
     # Start Logging
     logging.basicConfig(handlers=[logging.FileHandler('discord.log', 'a', 'utf-8')],
                         level=logging.INFO)
-
-    data = fmtjson.read_json('options')
+    try:
+        data = fmtjson.read_json('options')
+    except Exception as e:
+        catchlog(e)
 
     # run bot/start loop
     try:
