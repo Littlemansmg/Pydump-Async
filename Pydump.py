@@ -45,13 +45,11 @@ def admin_check():
             return ctx.message.author.server_permissions.administrator
     return commands.check(predicate)
 
-def nopms():
-    def predicate(ctx):
-        if ctx.message.channel.is_private:
-            raise commands.NoPrivateMessage
-        else:
-            return True
-    return commands.check(predicate)
+def nopms(ctx):
+    if ctx.message.channel.is_private:
+        raise commands.NoPrivateMessage
+    else:
+        return True
 
 # ---------------------------Tasks-----------------------------------
 async def getposts():
@@ -168,7 +166,7 @@ async def respcheck(url):
 
 # ---------------------------BOT-------------------------------------
 bot = commands.Bot(command_prefix = 'r/', case_insensitive = True)
-bot.add_check(nopms())
+bot.add_check(nopms)
 
 # ---------------------------Events----------------------------------
 @bot.event
