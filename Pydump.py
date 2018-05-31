@@ -190,7 +190,7 @@ async def on_server_join(server):
     )
     fmtjson.edit_json('options', data)
 
-    await bot.send_message(discord.Server.owner, 'Thanks for adding me to the server! There are a few things I need '
+    await bot.send_message(server.owner, 'Thanks for adding me to the server! There are a few things I need '
                                                  'from you or your admins to get running though.\n'
                                                  'Please set the default channel for me to post in, or turn on the '
                                                  'option for me to create a channel for each subreddit. '
