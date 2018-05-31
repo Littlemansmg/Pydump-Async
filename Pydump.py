@@ -42,11 +42,15 @@ def catchlog(exception):
 # ---------------------------Checks----------------------------------
 def admin_check():
     def predicate(ctx):
-        try:
             return ctx.message.author.server_permissions.administrator
-        except:
-            raise commands.NoPrivateMessage
     return commands.check(predicate)
+
+def nopms():
+    def predicate(ctx):
+        if ctx.message.channel.is_private:
+            raise commands.NoPrivateMessage
+        else:
+            return True
 
 # ---------------------------Tasks-----------------------------------
 async def getposts():
@@ -162,7 +166,7 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = 'r/', case_insensitive = True)
+bot = commands.Bot(command_prefix = 'r/', case_insensitive = True, add_check = nopms())
 
 # ---------------------------Events----------------------------------
 @bot.event
@@ -220,9 +224,7 @@ async def on_server_remove(server):
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(ctx.message.channel, 'Stop it, You don\'t have permission to do this. If you '
-                                                    'do have permission, run the command in the server i\'m '
-                                                    'actually on.')
+        await bot.send_message(ctx.message.channel, 'Stop it, You can\'t use me in a PM. Go into a server.')
         catchlog(error)
 
     if isinstance(error, commands.CommandInvokeError):
