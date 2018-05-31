@@ -251,7 +251,6 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 @bot.group(pass_context = True, name = 'default', case_insensitive = True)
-# @nopms()
 @admin_check()
 async def setDefaults(ctx):
     """
@@ -266,7 +265,7 @@ async def setDefaults(ctx):
         commandinfo(ctx)
 
 @setDefaults.command(pass_context = True, name = 'channel')
-# @admin_check()
+@admin_check()
 async def defaultChannel(ctx, channel):
     """
     Set the Default channel for the bot to post in.
