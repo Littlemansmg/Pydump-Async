@@ -55,26 +55,27 @@ async def getposts():
 
     while True:
         now = dt.utcnow()
-        for id in data:
+        for server in data:
             # get default posting channel from json file
-            destination = bot.get_channel(data[id]['default_channel'])
+            destination = bot.get_channel(data[server]['default_channel'])
 
             # reddits that the server is watching
-            reddits = list(data[id]['watching'])
+            reddits = list(data[server]['watching'])
 
             # store nsfw filter
-            nsfwfilter = data[id]['NSFW_filter']
+            nsfwfilter = data[server]['NSFW_filter']
 
             # store channel creation option
-            create = data[id]['create_channel']
+            create = data[server]['create_channel']
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None:
+
                 break
             elif reddits == None:
                 await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
                                                     'to start getting posts!')
-                break
+                continue
 
             for reddit in reddits:
                 images = []
@@ -109,18 +110,20 @@ async def getposts():
                         await bot.send_message(destination, f'From r/{reddit} {image}')
                         await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
                 elif create == 1 and images:
-                    sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
+                    sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
+                                               server__id = data[server]['id'])
 
                     # If channel is not found, it applies NoneType. This statement creates the channel.
                     # The sleep is required because if the bot goes too fast, it can't find the channel,
                     # even though it exists.
                     if sendto is None:
-                        await bot.create_channel(bot.get_server(data[id]['id']),
+                        await bot.create_channel(bot.get_server(data[server]['id']),
                                                      name=str(reddit),
                                                      type=discord.ChannelType.text)
                         await asyncio.sleep(5)
                         # reassign's sendto so that it is no longer NoneType
-                        sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)))
+                        sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
+                                                   server__id = data[server]['id'])
 
                     await bot.send_message(sendto, '\n'.join(images))
 
@@ -169,7 +172,7 @@ async def on_server_join(server):
     When the bot joins a server, it will set defaults in the json file and pull all info it needs.
 
     defaults:
-        default channel == ''
+        default channel == 'server owner'
         id == server id
         nsfw filter == 1
         create channel == 0
@@ -191,13 +194,13 @@ async def on_server_join(server):
     fmtjson.edit_json('options', data)
 
     await bot.send_message(server.owner, 'Thanks for adding me to the server! There are a few things I need '
-                                                 'from you or your admins to get running though.\n'
-                                                 'Please set the default channel for me to post in, or turn on the '
-                                                 'option for me to create a channel for each subreddit. '
-                                                 '`r/default channel <channel name>` or `r/default create`\n'
-                                                 'Right now I have the default channel set to PM you, so I would '
-                                                 'suggest changing this. After that, you or your admins '
-                                                 'can run `r/sub <subreddit name>` and let the posts flow in!')
+                                         'from you or your admins to get running though.\n'
+                                         'Please set the default channel for me to post in, or turn on the '
+                                         'option for me to create a channel for each subreddit. '
+                                         '`r/default channel <channel name>` or `r/default create`\n'
+                                         'Right now I have the default channel set to PM you, so I would '
+                                         'suggest changing this. After that, you or your admins '
+                                         'can run `r/sub <subreddit name>` and let the posts flow in!')
 
 @bot.event
 async def on_server_remove(server):
@@ -213,13 +216,6 @@ async def on_server_remove(server):
 '''
 @bot.event
 async def on_command_error(error, ctx)
-    pass
-    
-@bot.event
-async def on_command_completion(ctx)
-    """
-    This is pretty much just a logger when a command is used. 
-    """
     pass
 '''
 
