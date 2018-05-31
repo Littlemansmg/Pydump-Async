@@ -51,6 +51,7 @@ def nopms():
             raise commands.NoPrivateMessage
         else:
             return True
+    return commands.check(predicate)
 
 # ---------------------------Tasks-----------------------------------
 async def getposts():
