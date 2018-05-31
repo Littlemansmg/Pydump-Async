@@ -167,7 +167,8 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = 'r/', case_insensitive = True, add_check = nopms)
+bot = commands.Bot(command_prefix = 'r/', case_insensitive = True)
+bot.add_check(nopms())
 
 # ---------------------------Events----------------------------------
 @bot.event
