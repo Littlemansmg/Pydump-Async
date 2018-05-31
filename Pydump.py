@@ -167,7 +167,7 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = 'r/', case_insensitive = True, add_check = nopms())
+bot = commands.Bot(command_prefix = 'r/', case_insensitive = True, add_check = nopms)
 
 # ---------------------------Events----------------------------------
 @bot.event
@@ -252,6 +252,7 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 @bot.group(pass_context = True, name = 'default', case_insensitive = True)
+# @nopms()
 # @admin_check()
 async def setDefaults(ctx):
     """
