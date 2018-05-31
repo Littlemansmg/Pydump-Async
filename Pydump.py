@@ -388,10 +388,10 @@ async def subscribe(ctx, subreddit):
             sid = ctx.message.server.id
             if str(sid) == data[server]['id']:
                 subs = data[server]['watching']
-                if subreddit in subs:
+                if subreddit.lower in subs:
                     await bot.say(f'{subreddit} is already in your list!')
                     break
-                subs.append(subreddit)
+                subs.append(subreddit.lower())
                 data[server]['watching'] = subs
                 await bot.say(f'Subreddit: {subreddit} added!\n'
                               f'You will notice this change when I scour reddit again.')
