@@ -264,7 +264,7 @@ async def defaultChannel(ctx, channel):
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
             data[server]['default_channel'] = newchannel.id
-            await bot.say(f"default channel changed to {newchannel.mention}\n"
+            await bot.say(f"Default channel changed to {newchannel.mention}\n"
                           f"You will notice this change when I scour reddit again.")
             fmtjson.edit_json('options', data)
             break
