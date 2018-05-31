@@ -396,13 +396,13 @@ async def subscribe(ctx, subreddit):
                 subs = data[server]['watching']
                 if subreddit.lower() in subs:
                     await bot.say(f'{subreddit} is already in your list!')
-                    break
-                subs.append(subreddit.lower())
-                data[server]['watching'] = subs
-                await bot.say(f'Subreddit: {subreddit} added!\n'
-                              f'You will notice this change when I scour reddit again.')
+                else:
+                    subs.append(subreddit.lower())
+                    data[server]['watching'] = subs
+                    await bot.say(f'Subreddit: {subreddit} added!\n'
+                                  f'You will notice this change when I scour reddit again.')
 
-                fmtjson.edit_json('options', data)
+                    fmtjson.edit_json('options', data)
                 break
     else:
         await bot.say(f'Sorry, I can\'t reach {subreddit}. '
@@ -479,7 +479,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        bot.loop.create_task(getposts())
+        # bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
