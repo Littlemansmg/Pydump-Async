@@ -42,7 +42,10 @@ def catchlog(exception):
 # ---------------------------Checks----------------------------------
 def admin_check():
     def predicate(ctx):
-        return ctx.message.author.server_permissions.administrator
+        try:
+            return ctx.message.author.server_permissions.administrator
+        except:
+            raise commands.MissingPermissions
     return commands.check(predicate)
 
 # ---------------------------Tasks-----------------------------------
@@ -231,7 +234,6 @@ async def on_command_error(error, ctx):
         await bot.delete_message(ctx.message)
         await bot.send_message(ctx.message.channel, 'Nope. Not a command.')
         catchlog(error)
-
 
 # -------------------------Commands----------------------------------
 
@@ -473,7 +475,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        bot.loop.create_task(getposts())
+        # bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
