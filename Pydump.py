@@ -222,7 +222,7 @@ async def defaultChannel(ctx, channel):
     :param channel:
     :return:
     """
-    newchannel = discord.utils.get(bot.get_all_channels(), name = channel, server_id = ctx.message.server.id)
+    newchannel = discord.utils.get(bot.get_all_channels(), name = channel, server__id = ctx.message.server.id)
 
     for server in data:
 
