@@ -165,7 +165,7 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = 'r/', case_insensitive = True)
+bot = commands.Bot(command_prefix = 'r/')
 bot.add_check(nopms)
 
 # ---------------------------Events----------------------------------
@@ -234,7 +234,9 @@ async def on_command_error(error, ctx):
 
     if isinstance(error, commands.CommandNotFound):
         await bot.delete_message(ctx.message)
-        await bot.send_message(ctx.message.channel, 'Nope. Not a command.')
+        await bot.send_message(ctx.message.channel, 'Either you didn\'t type a proper command, or you did'
+                                                    'but you added a capital letter somewhere. All commands are '
+                                                    'lowercase.')
         catchlog(error)
 
 # -------------------------Commands----------------------------------
@@ -320,7 +322,7 @@ async def nsfwFilter(ctx):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'create')
-# @admin_check()
+@admin_check()
 async def createChannels(ctx):
     '''
     Toggles the create channels option. DEFAULT: OFF
@@ -346,7 +348,7 @@ async def createChannels(ctx):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'show')
-# @admin_check()
+@admin_check()
 async def showDefaults(ctx):
     '''
     This command will show all defaults for the server.
@@ -374,7 +376,7 @@ async def showDefaults(ctx):
     changedefault(ctx)
 
 @bot.command(pass_context = True, name = 'sub')
-# @admin_check()
+@admin_check()
 async def subscribe(ctx, subreddit):
     """
     This command will 'subscribe' to a reddit and will make posts from it.
@@ -410,7 +412,7 @@ async def subscribe(ctx, subreddit):
 
 
 @bot.command(pass_context = True, name = 'unsub')
-# @admin_check()
+@admin_check()
 async def unsub(ctx, subreddit):
     """
     This command will 'unsubscribe' from a reddit and will no longer make posts.
@@ -477,7 +479,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        # bot.loop.create_task(getposts())
+        bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
