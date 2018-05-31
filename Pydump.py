@@ -40,10 +40,10 @@ def catchlog(exception):
     logging.info(f'{now} EXCEPTION CAUGHT: {exception}')
 
 # ---------------------------Checks----------------------------------
-# def admin_check():
-#     def predicate(ctx):
-#             return ctx.message.author.server_permissions.administrator
-#     return commands.check(predicate)
+def admin_check():
+    def predicate(ctx):
+            return ctx.message.author.server_permissions.administrator
+    return commands.check(predicate)
 
 def nopms():
     def predicate(ctx):
@@ -253,7 +253,7 @@ async def getPosts(ctx, reddit, sort):
 
 @bot.group(pass_context = True, name = 'default', case_insensitive = True)
 # @nopms()
-# @admin_check()
+@admin_check()
 async def setDefaults(ctx):
     """
     Base command to set the options for a server.
@@ -297,7 +297,7 @@ async def defaultChannel(ctx, channel):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
-# @admin_check()
+@admin_check()
 async def nsfwFilter(ctx):
     '''
     Toggles the NSFW filter. DEFAULT: ON
