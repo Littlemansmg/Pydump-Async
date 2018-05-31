@@ -45,7 +45,7 @@ def admin_check():
         try:
             return ctx.message.author.server_permissions.administrator
         except:
-            raise commands.MissingPermissions
+            raise commands.MissingPermissions(discord.Permissions.administrator)
     return commands.check(predicate)
 
 # ---------------------------Tasks-----------------------------------
