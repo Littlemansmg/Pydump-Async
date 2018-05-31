@@ -268,7 +268,7 @@ async def nsfwFilter(ctx):
 @admin_check()
 async def createChannels(ctx):
     '''
-    Toggles the NSFW filter. DEFAULT: ON
+    Toggles the create channels option. DEFAULT: OFF
     :param ctx:
     :return:
     '''
@@ -287,6 +287,31 @@ async def createChannels(ctx):
             break
 
     changedefault(ctx)
+
+@setDefaults.command(pass_context = True, name = 'show')
+@admin_check()
+async def showDefaults(ctx):
+    '''
+    This command will show all defaults for the server.
+    :param ctx:
+    :return:
+    '''
+    for server in data:
+        if ctx.message.server.id == data[server]['id']:
+            channel = bot.get_channel(data[server]['default_channel'])
+            if data[server]['NSFW_filter'] == 0:
+                nsfw = 'OFF'
+            else:
+                nsfw = 'ON'
+            if data[server]['create_channels'] == 0:
+                create = 'OFF'
+            else:
+                create = 'ON'
+
+            await bot.say(f"Default channel: {channel.mention}\n"
+                    f"NSFW filter: {nsfw}\n"
+                    f"Create channels: {create}")
+            break
 
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
