@@ -40,10 +40,10 @@ def catchlog(exception):
     logging.info(f'{now} EXCEPTION CAUGHT: {exception}')
 
 # ---------------------------Checks----------------------------------
-def admin_check():
-    def predicate(ctx):
-            return ctx.message.author.server_permissions.administrator
-    return commands.check(predicate)
+# def admin_check():
+#     def predicate(ctx):
+#             return ctx.message.author.server_permissions.administrator
+#     return commands.check(predicate)
 
 def nopms():
     def predicate(ctx):
