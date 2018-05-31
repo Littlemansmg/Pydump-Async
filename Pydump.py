@@ -252,7 +252,7 @@ async def getPosts(ctx, reddit, sort):
     pass
 
 @bot.group(pass_context = True, name = 'default', case_insensitive = True)
-@admin_check()
+# @admin_check()
 async def setDefaults(ctx):
     """
     Base command to set the options for a server.
@@ -266,7 +266,7 @@ async def setDefaults(ctx):
         commandinfo(ctx)
 
 @setDefaults.command(pass_context = True, name = 'channel')
-@admin_check()
+# @admin_check()
 async def defaultChannel(ctx, channel):
     """
     Set the Default channel for the bot to post in.
@@ -296,7 +296,7 @@ async def defaultChannel(ctx, channel):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
-@admin_check()
+# @admin_check()
 async def nsfwFilter(ctx):
     '''
     Toggles the NSFW filter. DEFAULT: ON
@@ -321,7 +321,7 @@ async def nsfwFilter(ctx):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'create')
-@admin_check()
+# @admin_check()
 async def createChannels(ctx):
     '''
     Toggles the create channels option. DEFAULT: OFF
@@ -347,7 +347,7 @@ async def createChannels(ctx):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'show')
-@admin_check()
+# @admin_check()
 async def showDefaults(ctx):
     '''
     This command will show all defaults for the server.
@@ -375,7 +375,7 @@ async def showDefaults(ctx):
     changedefault(ctx)
 
 @bot.command(pass_context = True, name = 'sub')
-@admin_check()
+# @admin_check()
 async def subscribe(ctx, subreddit):
     """
     This command will 'subscribe' to a reddit and will make posts from it.
@@ -411,7 +411,7 @@ async def subscribe(ctx, subreddit):
 
 
 @bot.command(pass_context = True, name = 'unsub')
-@admin_check()
+# @admin_check()
 async def unsub(ctx, subreddit):
     """
     This command will 'unsubscribe' from a reddit and will no longer make posts.
