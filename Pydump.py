@@ -72,8 +72,8 @@ async def getposts():
             if destination == None:
                 break
             elif reddits == None:
-                await bot.send_message(destination, 'I don\'t have any reddits to watch! Type r/sub <subreddit> to start '
-                                       'getting posts!')
+                await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
+                                                    'to start getting posts!')
                 break
 
             for reddit in reddits:
@@ -177,11 +177,10 @@ async def on_server_join(server):
     :param server:
     :return:
     """
-    serverNo = len(data)
 
     data.update(
-        {str(serverNo): {
-            'default_channel': '',
+        {server.id: {
+            'default_channel': server.owner.id,
             'id': server.id,
             'watching': [],
             'NSFW_filter': 1,
@@ -190,6 +189,26 @@ async def on_server_join(server):
         }
     )
     fmtjson.edit_json('options', data)
+
+    await bot.send_message(discord.Server.owner, 'Thanks for adding me to the server! There are a few things I need '
+                                                 'from you or your admins to get running though.\n'
+                                                 'Please set the default channel for me to post in, or turn on the '
+                                                 'option for me to create a channel for each subreddit. '
+                                                 '`r/default channel <channel name>` or `r/default create`\n'
+                                                 'Right now I have the default channel set to PM you, so I would '
+                                                 'suggest changing this. After that, you or your admins '
+                                                 'can run `r/sub <subreddit name>` and let the posts flow in!')
+
+@bot.event
+async def on_server_remove(server):
+    """
+    When a bot leaves/gets kicked, remove the server from the .json file.
+    :param server:
+    :return:
+    """
+    data.pop(server.id, None)
+
+    fmtjson.edit_json("options", data)
 
 '''
 @bot.event
@@ -221,7 +240,9 @@ async def getPosts(ctx, reddit, sort):
 @admin_check()
 async def setDefaults(ctx):
     """
-    base command to call subcommands to set defaults for the server.
+    Base command to set the options for a server.
+    Usage: r/default
+    Permissions required: Administrator
     :param ctx:
     :return:
     """
@@ -233,7 +254,9 @@ async def setDefaults(ctx):
 @admin_check()
 async def defaultChannel(ctx, channel):
     """
-    set default channel
+    Set the Default channel for the bot to post in.
+    Usage: r/default channel <channel>
+    Permissions required: Administrator
     :param ctx:
     :param channel:
     :return:
@@ -247,11 +270,8 @@ async def defaultChannel(ctx, channel):
             data[server]['default_channel'] = newchannel.id
             await bot.say(f"default channel changed to {newchannel.mention}\n"
                           f"You will notice this change when I scour reddit again.")
-
             fmtjson.edit_json('options', data)
-
             break
-
         else:
             continue
 
@@ -262,6 +282,8 @@ async def defaultChannel(ctx, channel):
 async def nsfwFilter(ctx):
     '''
     Toggles the NSFW filter. DEFAULT: ON
+    Usage: r/default nsfw
+    Permissions required: Administrator
     :param ctx:
     :return:
     '''
@@ -285,6 +307,8 @@ async def nsfwFilter(ctx):
 async def createChannels(ctx):
     '''
     Toggles the create channels option. DEFAULT: OFF
+    Usage: r/default create
+    Permissions required: Administrator
     :param ctx:
     :return:
     '''
@@ -309,6 +333,7 @@ async def createChannels(ctx):
 async def showDefaults(ctx):
     '''
     This command will show all defaults for the server.
+    Usage: r/default show
     :param ctx:
     :return:
     '''
@@ -329,11 +354,15 @@ async def showDefaults(ctx):
                     f"Create channels: {create}")
             break
 
+    changedefault(ctx)
+
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, subreddit):
     """
-    command to 'subscribe' to a subreddit. aka watch for new posts
+    This command will 'subscribe' to a reddit and will make posts from it.
+    Usage: r/sub <subreddit>
+    Permissions required: Administrator
     :param ctx:
     :param subreddit:
     :return:
@@ -353,18 +382,20 @@ async def subscribe(ctx, subreddit):
 
                 fmtjson.edit_json('options', data)
                 break
-
-    # TODO: Make reachable.
     else:
         await bot.say(f'Sorry, I can\'t reach {subreddit}. '
                       f'Check your spelling or make sure that the reddit actually exists.')
+
+    commandinfo(ctx)
 
 
 @bot.command(pass_context = True, name = 'unsub')
 @admin_check()
 async def unsub(ctx, subreddit):
     """
-    unsubscribes from a specified subreddit. 
+    This command will 'unsubscribe' from a reddit and will no longer make posts.
+    Usage: r/unsub <subreddit>
+    Permissions required: Administrator
     :param ctx:
     :param subreddit:
     :return:
@@ -385,14 +416,16 @@ async def unsub(ctx, subreddit):
                 await bot.say(f'Subreddit: {subreddit} not found. Please make sure you are spelling'
                               f' it correctly.')
                 break
-
         else:
             continue
+
+    commandinfo(ctx)
 
 @bot.command(pass_context = True, name = 'listsubs')
 async def listsubs(ctx):
     """
-    shows a list of subreddits that the bot is watching for the server.
+    Shows a list of subreddits that the bot is subscribed to on a server.
+    Usage r/listsubs
     :param ctx:
     :return:
     """
@@ -405,6 +438,8 @@ async def listsubs(ctx):
                 strsub += f'r/{sub}\n'
 
             await bot.say(f"This server is subbed to:\n{strsub}")
+
+    commandinfo(ctx)
 
 # ---------------------------Run-------------------------------------
 if __name__ == '__main__':
