@@ -45,7 +45,7 @@ def admin_check():
         try:
             return ctx.message.author.server_permissions.administrator
         except:
-            raise commands.MissingPermissions(discord.Permissions.administrator)
+            raise commands.NoPrivateMessage
     return commands.check(predicate)
 
 # ---------------------------Tasks-----------------------------------
@@ -219,7 +219,7 @@ async def on_server_remove(server):
 
 @bot.event
 async def on_command_error(error, ctx):
-    if isinstance(error, commands.MissingPermissions):
+    if isinstance(error, commands.NoPrivateMessage):
         await bot.send_message(ctx.message.channel, 'Stop it, You don\'t have permission to do this. If you '
                                                     'do have permission, run the command in the server i\'m '
                                                     'actually on.')
