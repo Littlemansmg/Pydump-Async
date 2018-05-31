@@ -206,7 +206,7 @@ async def on_server_remove(server):
     :param server:
     :return:
     """
-    data.pop(server.id, None)
+    data.pop(str(server.id), None)
 
     fmtjson.edit_json("options", data)
 
