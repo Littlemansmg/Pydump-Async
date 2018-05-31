@@ -275,12 +275,12 @@ async def createChannels(ctx):
     for server in data:
         toggle = ctx.message.server.id
         if toggle == data[server]['id']:
-            if data[server]['create_channels'] == 1:
-                data[server]['create_channels'] = 0
+            if data[server]['create_channel'] == 1:
+                data[server]['create_channel'] = 0
                 await bot.say("Creating channels has been TURNED OFF. I will now make all of my posts in "
                               "your default channel.")
             else:
-                data[server]['create_channels'] = 1
+                data[server]['create_channel'] = 1
                 await bot.say("Creating channels has been TURNED ON. I can now create channels for each reddit "
                               "that you are watching.")
             fmtjson.edit_json('options', data)
