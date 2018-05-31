@@ -1,14 +1,31 @@
 # Pydump-Rewrite
 This bot is built to follow subreddits and send posts to a discord server.
-It will have various options that admins can set so personalize what they want the bot to post. 
+It has various options like a nsfw filter and different viewing options 
 
 ## Getting Started
-The bot is still under heavy development and should not be added to any server as of right now (5/16/18)
+The bot is almost good enough for myself, then I need to make sure that I can seperate the NSFW content and create nsfw channels (just to be safe). 5/31/18
 
 ## Current Functionality
-* Bot can access Reddit's json object of a subreddit from any sort (i.e. new/hot/top).
+* Bot can access Reddit's json object of a subreddit.
 * Bot can sort through the json object to find the proper URL and send the URL + the subreddit it came from to discord. 
 * Bot can read server settings from json file.
+* Bot can set various options
+  * Default channel (optional in some cases)
+    * Where the bot should send reddit posts
+    * Default position is the server owner
+  * NSFW filter
+    * Filters out what reddit has flaged as over 18 content
+    * Default on
+    * Toggleable
+  * Create channels
+    * This option will set if the bot can create a channel for each subreddit it's watching
+    * Default off
+    * Toggleable
+  * Set valid subreddits to 'subscribe' to
+    * List of reddits for the bot to check for post from
+    * Defaulted to an empty list
+* Bot can add/remove a server with set defaults with no user interaction
+* All major commands i.e. sub, unsub, toggle nsfw/create are admin only commands
 
 ## TODO
 *This list is in no particular order.*
@@ -16,10 +33,14 @@ The bot is still under heavy development and should not be added to any server a
   * default sort
   * default time to get posts (1min/5min/10min etc.)
     * This includes changing the sleep time so that it runs at the proper times
+  * default nsfw channel
+    * This also includes setting the channel to NSFW
+  * Allow suggestions / suggestion channel
   * More to come as I think about them
-* Find a way to append new servers to the json object with some defaults
-* If default_channel is not set, find a way to get a message to the admins to set it. 
-* Add commands with proper checks to set options.
+* Set up role based checks. 
+  * Ex. Instead of just admins, let people with x role use the command.
+* Suggestion command for subreddits
+* About the bot info
 
 ## Built With
 * [Discord.py](https://github.com/Rapptz/discord.py) - Discord API wrapper to run a discord bot in Python.
