@@ -303,7 +303,7 @@ async def showDefaults(ctx):
                 nsfw = 'OFF'
             else:
                 nsfw = 'ON'
-            if data[server]['create_channels'] == 0:
+            if data[server]['create_channel'] == 0:
                 create = 'OFF'
             else:
                 create = 'ON'
