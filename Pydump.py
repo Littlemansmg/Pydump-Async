@@ -69,7 +69,11 @@ async def getposts():
             create = data[id]['create_channel']
 
             # Don't do anything if the bot can't find reddits or a destination.
-            if destination == None or reddits == None:
+            if destination == None:
+                break
+            elif reddits == None:
+                await bot.send_message(destination, 'I don\'t have any reddits to watch! Type r/sub <subreddit> to start '
+                                       'getting posts!')
                 break
 
             for reddit in reddits:
@@ -168,12 +172,24 @@ async def on_server_join(server):
         default channel == ''
         id == server id
         nsfw filter == 1
-        create channels == 0
+        create channel == 0
         watching == []
     :param server:
     :return:
     """
-    pass
+    serverNo = len(data)
+
+    data.update(
+        {str(serverNo): {
+            'default_channel': '',
+            'id': server.id,
+            'watching': [],
+            'NSFW_filter': 1,
+            'create_channel': 0
+            }
+        }
+    )
+    fmtjson.edit_json('options', data)
 
 '''
 @bot.event
