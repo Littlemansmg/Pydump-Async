@@ -48,7 +48,7 @@ def catchlog(exception):
 def nopms():
     def predicate(ctx):
         if ctx.message.channel.is_private:
-            raise commands.NoPrivateMessage
+            return False
         else:
             return True
     return commands.check(predicate)
