@@ -479,7 +479,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        # bot.loop.create_task(getposts())
+        bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
