@@ -159,7 +159,7 @@ async def respcheck(url):
     return posts
 
 # ---------------------------BOT-------------------------------------
-bot = commands.Bot(command_prefix = 'r/')
+bot = commands.Bot(command_prefix = 'r/', case_insensitive = True)
 
 # ---------------------------Events----------------------------------
 @bot.event
@@ -195,12 +195,12 @@ async def on_server_join(server):
 
     await bot.send_message(server.owner, 'Thanks for adding me to the server! There are a few things I need '
                                          'from you or your admins to get running though.\n'
-                                         'Please set the default channel for me to post in, or turn on the '
-                                         'option for me to create a channel for each subreddit. '
-                                         '`r/default channel <channel name>` or `r/default create`\n'
-                                         'Right now I have the default channel set to PM you, so I would '
-                                         'suggest changing this. After that, you or your admins '
-                                         'can run `r/sub <subreddit name>` and let the posts flow in!')
+                                         'In the discord server(NOT HERE),Please set the default channel for me to '
+                                         'post in, or turn on the option for me to create a channel for each '
+                                         'subreddit. `r/default channel general` or `r/default create`\n'
+                                         'Right now I have the default channel set to PM you, so *I would '
+                                         'suggest changing this*. After that, you or your admins '
+                                         'can run `r/sub funny` and let the posts flow in!')
 
 @bot.event
 async def on_server_remove(server):
@@ -213,11 +213,25 @@ async def on_server_remove(server):
 
     fmtjson.edit_json("options", data)
 
-'''
+
 @bot.event
-async def on_command_error(error, ctx)
-    pass
-'''
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.MissingPermissions):
+        await bot.send_message(ctx.message.channel, 'Stop it, You don\'t have permission to do this. If you '
+                                                    'do have permission, run the command in the server i\'m '
+                                                    'actually on.')
+        catchlog(error)
+
+    if isinstance(error, commands.CommandInvokeError):
+        await bot.send_message(ctx.message.channel, 'You messed up the command. Make sure you are doing it right, '
+                                                    'and you are in a discord server I\'m on.')
+        catchlog(error)
+
+    if isinstance(error, commands.CommandNotFound):
+        await bot.delete_message(ctx.message)
+        await bot.send_message(ctx.message.channel, 'Nope. Not a command.')
+        catchlog(error)
+
 
 # -------------------------Commands----------------------------------
 
@@ -232,7 +246,7 @@ async def getPosts(ctx, reddit, sort):
     """
     pass
 
-@bot.group(pass_context = True, name = 'default')
+@bot.group(pass_context = True, name = 'default', case_insensitive = True)
 @admin_check()
 async def setDefaults(ctx):
     """
@@ -258,6 +272,9 @@ async def defaultChannel(ctx, channel):
     :return:
     """
     newchannel = discord.utils.get(bot.get_all_channels(), name = channel, server__id = ctx.message.server.id)
+
+    if not newchannel:
+        raise commands.CommandInvokeError
 
     for server in data:
 
@@ -371,6 +388,9 @@ async def subscribe(ctx, subreddit):
             sid = ctx.message.server.id
             if str(sid) == data[server]['id']:
                 subs = data[server]['watching']
+                if subreddit in subs:
+                    await bot.say(f'{subreddit} is already in your list!')
+                    break
                 subs.append(subreddit)
                 data[server]['watching'] = subs
                 await bot.say(f'Subreddit: {subreddit} added!\n'
