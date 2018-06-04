@@ -252,7 +252,7 @@ async def getPosts(ctx, reddit, sort):
     """
     pass
 
-@bot.group(pass_context = True, name = 'default', case_insensitive = True)
+@bot.group(pass_context = True, name = 'default')
 @admin_check()
 async def setDefaults(ctx):
     """
@@ -311,7 +311,8 @@ async def nsfwFilter(ctx):
         if toggle == data[server]['id']:
             if data[server]['NSFW_filter'] == 1:
                 data[server]['NSFW_filter'] = 0
-                await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser.")
+                await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser. Also be sure"
+                              "to label your default channel or the NSFW reddit channels as NSFW channels.")
             else:
                 data[server]['NSFW_filter'] = 1
                 await bot.say("NSFW filter has been TURNED ON. I really don't like looking for those "
@@ -456,11 +457,46 @@ async def listsubs(ctx):
         if str(sid) == data[server]['id']:
             subs = data[server]['watching']
             strsub = ''
+            if not subs:
+                await bot.say('This server isn\'t subbed to anything. Have an adminstrator type '
+                              '`r/sub <subreddit name> to sub. EX `r/sub funny`')
+                break
             for sub in subs:
                 strsub += f'r/{sub}\n'
 
             await bot.say(f"This server is subbed to:\n{strsub}")
 
+    commandinfo(ctx)
+
+@bot.group(pass_context = True, name = 'about')
+async def about(ctx):
+    if ctx.invoked_subcommand is None:
+        await bot.say('Sorry, you must type `r/about bot` or `r/about dev`')
+
+@about.command(pass_context = True, name = 'bot')
+async def botabout(ctx):
+    await bot.say('```'
+                  'This is a bot developed by LittlemanSMG in python using discord.py v0.16.12\n'
+                  'I use a standard json file to store ID\'s and all the options for each server.\n'
+                  'Code is free to use/look at, following the MIT lisence at '
+                  'www.github.com/littlemansmg/pydump-rewrite \n'
+                  'Have any recommendations for/issues with the bot? Open up an Issue on github!\n'
+                  '```')
+    commandinfo(ctx)
+
+@about.command(pass_context = True, name = 'dev')
+async def devabout(ctx):
+    await bot.say('```'
+                  "I really don't feel like I need this, but here it is. I'm Scott 'LittlemanSMG' Goes, and"
+                  "I made this bot on my own, with some help from r/discord_bots discord. Originally, this bot was "
+                  "made using Praw, a reddit api wrapper, but ran into some massive blocking issues. There was so many"
+                  "issues that I had to remake the bot using aiohttp and it's a much better bot now. "
+                  "mee6 has this kind of functionality, but I didn't want to deal with all of mee6. I just wanted "
+                  "the reddit portion. The original intention was to streamline my meme consumption, but "
+                  "I realised that this bot could be used for more than just memes. All of my work is currently "
+                  "on github(www.github.com/littlemansmg. It isn't much because i'm still learning, "
+                  "but I am getting better.\n"
+                  "```")
     commandinfo(ctx)
 
 # ---------------------------Run-------------------------------------
