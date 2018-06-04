@@ -5,19 +5,24 @@ Pydump is a bot that is used to send reddit posts to discord per server.
 Using Discord.py
 github www.github.com/littlemansmg/Pydump-rewrite
 """
+# region -----IMPORTS
+import asyncio
 
-# ---------------------------Imports---------------------------------
 import logging
+from datetime import datetime as dt
+
 import aiohttp
 import discord
-import asyncio
-import json
 from discord.ext import commands
-from datetime import datetime as dt
+
 import fmtjson
 
-# ---------------------------Logs------------------------------------
+
+# endregion
+
+# region -----LOGS
 def commandinfo(ctx):
+    # log when a command it used
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} COMMAND USED; '
                  f'Server_id: {ctx.message.server.id} '
@@ -25,6 +30,7 @@ def commandinfo(ctx):
                  f'Invoke: {ctx.message.content}')
 
 def changedefault(ctx):
+    # log when a default has been changed
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} DEFAULT CHANGED; '
                  f'Server_id: {ctx.message.server.id} '
@@ -32,26 +38,32 @@ def changedefault(ctx):
                  f'Invoke: {ctx.message.content}')
 
 def taskcomplete():
+    # log when the task finishes
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Task completed successfully!')
 
 def catchlog(exception):
+    # General log for exceptions
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} EXCEPTION CAUGHT: {exception}')
+# endregion
 
-# ---------------------------Checks----------------------------------
+#region -----CHECKS
 def admin_check():
+    # check if the user is an admin
     def predicate(ctx):
             return ctx.message.author.server_permissions.administrator
     return commands.check(predicate)
 
 def nopms(ctx):
+    # check for no PM's
     if ctx.message.channel.is_private:
         raise commands.NoPrivateMessage
     else:
         return True
+# endregion
 
-# ---------------------------Tasks-----------------------------------
+# region -----TASKS
 async def getposts():
     """
     This function is the task that gets reddit posts on a 5 minute timer.
@@ -71,13 +83,15 @@ async def getposts():
             # store nsfw filter
             nsfwfilter = data[server]['NSFW_filter']
 
+            # TODO: check NSFW channel
+            # nsfw_channel = data[server]['NSFW_channel']
+
             # store channel creation option
             create = data[server]['create_channel']
 
             # Don't do anything if the bot can't find reddits or a destination.
             if destination == None:
-
-                break
+                continue
             elif reddits == None:
                 await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
                                                     'to start getting posts!')
@@ -91,6 +105,7 @@ async def getposts():
                 if not posts:
                     continue
 
+                # TODO: Make functions to clean up some of this code.
                 for x in posts:
                     posttime = dt.utcfromtimestamp(x['created_utc'])
                     # if 300 can't go into total seconds difference once, it gets added to the list of urls
@@ -101,15 +116,15 @@ async def getposts():
                             else:
                                 images.append(x['url'])
                         else:
+                            # TODO: create nsfw list
+                            # if x['over_18'] == True:
+                            #     nsfwimages.append(x['url']
                             images.append(x['url'])
 
                     # This skips to next reddit.
                     if not images:
                         await asyncio.sleep(1)
                         break
-
-                # TODO: Function this to make easier if the bot is supposed to post in a specific channel
-                # TODO: Make all links post at the same time to avoid ratelimit?
 
                 if create == 0 and images:
                     for image in images:
@@ -135,8 +150,9 @@ async def getposts():
 
         taskcomplete()
         await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
+# endregion
 
-# -------------------Other-Functions---------------------------------
+# region -----OTHER-FUNCTIONS
 async def respcheck(url):
     """
     This function is used to open up the json file from reddit and get the posts.
@@ -163,15 +179,20 @@ async def respcheck(url):
         catchlog(e)
 
     return posts
+# endregion
 
-# ---------------------------BOT-------------------------------------
+# region -----BOT CONTENT
 bot = commands.Bot(command_prefix = 'r/')
+# Check to prevent user from trying to use commands in a PM
 bot.add_check(nopms)
 
-# ---------------------------Events----------------------------------
+# region -----EVENTS
 @bot.event
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type r/help for help'))
+
+    # TODO: run on join function here so that if the bot is off, it can still set defaults.
+    # TODO: run on remove function so that if the bot is off, it can remove the server.
 
 @bot.event
 async def on_server_join(server):
@@ -220,9 +241,9 @@ async def on_server_remove(server):
 
     fmtjson.edit_json("options", data)
 
-
 @bot.event
 async def on_command_error(error, ctx):
+    # when error is raised, this is what happens.
     if isinstance(error, commands.NoPrivateMessage):
         await bot.send_message(ctx.message.channel, 'Stop it, You can\'t use me in a PM. Go into a server.')
         catchlog(error)
@@ -238,9 +259,9 @@ async def on_command_error(error, ctx):
                                                     'but you added a capital letter somewhere. All commands are '
                                                     'lowercase.')
         catchlog(error)
+# endregion
 
-# -------------------------Commands----------------------------------
-
+# region -----COMMANDS
 @bot.command(pass_context = True, name = 'get', hidden = True)
 async def getPosts(ctx, reddit, sort):
     """
@@ -252,6 +273,7 @@ async def getPosts(ctx, reddit, sort):
     """
     pass
 
+# region -----DEFAULT COMMAND GROUP
 @bot.group(pass_context = True, name = 'default')
 @admin_check()
 async def setDefaults(ctx):
@@ -283,7 +305,6 @@ async def defaultChannel(ctx, channel):
         raise commands.CommandInvokeError
 
     for server in data:
-
         sid = ctx.message.server.id
         if str(sid) == data[server]['id']:
             data[server]['default_channel'] = newchannel.id
@@ -376,6 +397,10 @@ async def showDefaults(ctx):
 
     changedefault(ctx)
 
+# TODO: r/default all - set all defaults back to original
+# endregion
+
+# TODO: allow multiple reddits at a time. ex. r/sub overwatch discord_bots
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, subreddit):
@@ -411,7 +436,7 @@ async def subscribe(ctx, subreddit):
 
     commandinfo(ctx)
 
-
+# TODO: allow multiple reddits at a time. ex. r/unsub memes ovweratch
 @bot.command(pass_context = True, name = 'unsub')
 @admin_check()
 async def unsub(ctx, subreddit):
@@ -444,6 +469,8 @@ async def unsub(ctx, subreddit):
 
     commandinfo(ctx)
 
+# TODO: Command to delete all subbed reddits.
+
 @bot.command(pass_context = True, name = 'listsubs')
 async def listsubs(ctx):
     """
@@ -468,6 +495,7 @@ async def listsubs(ctx):
 
     commandinfo(ctx)
 
+# region -----ABOUT COMMAND GROUP
 @bot.group(pass_context = True, name = 'about')
 async def about(ctx):
     if ctx.invoked_subcommand is None:
@@ -498,8 +526,13 @@ async def devabout(ctx):
                   "but I am getting better.\n"
                   "```")
     commandinfo(ctx)
+# endregion
 
-# ---------------------------Run-------------------------------------
+# endregion
+
+# endregion
+
+# region -----STARTUP
 if __name__ == '__main__':
     # get token
     with open('token.txt') as token:
@@ -519,3 +552,4 @@ if __name__ == '__main__':
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
+# endregion

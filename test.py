@@ -1,10 +1,9 @@
-import json
-import aiohttp
-import discord
-import asyncio
-from collections import defaultdict
+def test(*args):
+    testlist = args
 
-with open('options.json', 'r', encoding='utf-8') as file:
-    data = json.load(file)
+    for arg in args:
+        print(arg)
 
-print(len(data["0"]))
+num = 1
+
+test('i', 'like', num, 'pie')
