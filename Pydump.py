@@ -413,25 +413,25 @@ async def subscribe(ctx, *subreddit):
     :return:
     """
     for reddit in subreddit:
-        url = f"https://www.reddit.com/r/{subreddit}/new/.json"
+        url = f"https://www.reddit.com/r/{reddit}/new/.json"
         posts = await respcheck(url)
 
         if posts:
             sid = ctx.message.server.id
             subs = data[sid]['watching']
             if reddit.lower() in subs:
-                await bot.say(f'{subreddit} is already in your list!')
+                await bot.say(f'{reddit} is already in your list!')
                 continue
             else:
                 subs.append(reddit.lower())
                 data[sid]['watching'] = subs
-                await bot.say(f'Subreddit: {subreddit} added!\n'
+                await bot.say(f'Subreddit: {reddit} added!\n'
                               f'You will notice this change when I scour reddit again.')
 
                 fmtjson.edit_json('options', data)
             continue
         else:
-            await bot.say(f'Sorry, I can\'t reach {subreddit}. '
+            await bot.say(f'Sorry, I can\'t reach {reddit}. '
                           f'Check your spelling or make sure that the reddit actually exists.')
             continue
 
@@ -455,12 +455,12 @@ async def unsub(ctx, *subreddit):
         if reddit in subs:
             subs.remove(reddit)
             data[sid]['watching'] = subs
-            await bot.say(f'Subreddit: {subreddit} removed!\n'
+            await bot.say(f'Subreddit: {reddit} removed!\n'
                           f'You will notice this change when I scour reddit again.')
             fmtjson.edit_json('options', data)
             continue
         else:
-            await bot.say(f'Subreddit: {subreddit} not found. Please make sure you are spelling'
+            await bot.say(f'Subreddit: {reddit} not found. Please make sure you are spelling'
                           f' it correctly.')
             continue
 
