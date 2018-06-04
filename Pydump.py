@@ -412,29 +412,29 @@ async def subscribe(ctx, *subreddit):
     :param subreddit:
     :return:
     """
+    sid = ctx.message.server.id
+    subs = data[sid]['watching']
+    added = []
     for reddit in subreddit:
         url = f"https://www.reddit.com/r/{reddit}/new/.json"
         posts = await respcheck(url)
 
         if posts:
-            sid = ctx.message.server.id
-            subs = data[sid]['watching']
             if reddit.lower() in subs:
                 await bot.say(f'{reddit} is already in your list!')
                 continue
             else:
                 subs.append(reddit.lower())
-                data[sid]['watching'] = subs
-                await bot.say(f'Subreddit: {reddit} added!\n'
-                              f'You will notice this change when I scour reddit again.')
-
-                fmtjson.edit_json('options', data)
-            continue
+                added.append(reddit.lower())
         else:
             await bot.say(f'Sorry, I can\'t reach {reddit}. '
                           f'Check your spelling or make sure that the reddit actually exists.')
-            continue
 
+    data[sid]['watching'] = subs
+    await bot.say(f"Subreddit(s): {', '.join(added)} added!\n"
+                  f"You will notice this change when I scour reddit again.")
+
+    fmtjson.edit_json('options', data)
     commandinfo(ctx)
 
 # TODO: allow multiple reddits at a time. ex. r/unsub memes ovweratch
@@ -449,20 +449,21 @@ async def unsub(ctx, *subreddit):
     :param subreddit:
     :return:
     """
+    sid = ctx.message.server.id
+    subs = data[sid]['watching']
+    removed = []
     for reddit in subreddit:
-        sid = ctx.message.server.id
-        subs = data[sid]['watching']
         if reddit in subs:
-            subs.remove(reddit)
-            data[sid]['watching'] = subs
-            await bot.say(f'Subreddit: {reddit} removed!\n'
-                          f'You will notice this change when I scour reddit again.')
-            fmtjson.edit_json('options', data)
-            continue
+            subs.remove(reddit.lower)
+            removed.append(reddit.lower)
         else:
             await bot.say(f'Subreddit: {reddit} not found. Please make sure you are spelling'
                           f' it correctly.')
-            continue
+
+    data[sid]['watching'] = subs
+    await bot.say(f"Subreddit(s): {', '.join(removed)} removed!\n"
+                  f"You will notice this change when I scour reddit again.")
+    fmtjson.edit_json('options', data)
 
     commandinfo(ctx)
 
