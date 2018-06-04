@@ -429,12 +429,13 @@ async def subscribe(ctx, *subreddit):
         else:
             await bot.say(f'Sorry, I can\'t reach {reddit}. '
                           f'Check your spelling or make sure that the reddit actually exists.')
+    if added:
+        data[sid]['watching'] = subs
+        await bot.say(f"Subreddit(s): {', '.join(added)} added!\n"
+                      f"You will notice this change when I scour reddit again.")
 
-    data[sid]['watching'] = subs
-    await bot.say(f"Subreddit(s): {', '.join(added)} added!\n"
-                  f"You will notice this change when I scour reddit again.")
+        fmtjson.edit_json('options', data)
 
-    fmtjson.edit_json('options', data)
     commandinfo(ctx)
 
 # TODO: allow multiple reddits at a time. ex. r/unsub memes ovweratch
@@ -454,16 +455,16 @@ async def unsub(ctx, *subreddit):
     removed = []
     for reddit in subreddit:
         if reddit in subs:
-            subs.remove(reddit.lower)
-            removed.append(reddit.lower)
+            subs.remove(reddit.lower())
+            removed.append(reddit.lower())
         else:
             await bot.say(f'Subreddit: {reddit} not found. Please make sure you are spelling'
                           f' it correctly.')
-
-    data[sid]['watching'] = subs
-    await bot.say(f"Subreddit(s): {', '.join(removed)} removed!\n"
-                  f"You will notice this change when I scour reddit again.")
-    fmtjson.edit_json('options', data)
+    if removed:
+        data[sid]['watching'] = subs
+        await bot.say(f"Subreddit(s): {', '.join(removed)} removed!\n"
+                      f"You will notice this change when I scour reddit again.")
+        fmtjson.edit_json('options', data)
 
     commandinfo(ctx)
 
