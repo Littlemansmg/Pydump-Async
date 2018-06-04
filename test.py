@@ -1,9 +1,4 @@
-def test(*args):
-    testlist = args
+dictionary = {0: 'i',
+              'limp': 'lump'}
 
-    for arg in args:
-        print(arg)
-
-num = 1
-
-test('i', 'like', num, 'pie')
+print(dictionary[1])

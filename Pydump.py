@@ -403,7 +403,7 @@ async def showDefaults(ctx):
 # TODO: allow multiple reddits at a time. ex. r/sub overwatch discord_bots
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
-async def subscribe(ctx, subreddit):
+async def subscribe(ctx, *subreddit):
     """
     This command will 'subscribe' to a reddit and will make posts from it.
     Usage: r/sub <subreddit>
@@ -412,34 +412,35 @@ async def subscribe(ctx, subreddit):
     :param subreddit:
     :return:
     """
-    url = f"https://www.reddit.com/r/{subreddit}/new/.json"
-    posts = await respcheck(url)
+    for reddit in subreddit:
+        url = f"https://www.reddit.com/r/{subreddit}/new/.json"
+        posts = await respcheck(url)
 
-    if posts:
-        for server in data:
+        if posts:
             sid = ctx.message.server.id
-            if str(sid) == data[server]['id']:
-                subs = data[server]['watching']
-                if subreddit.lower() in subs:
-                    await bot.say(f'{subreddit} is already in your list!')
-                else:
-                    subs.append(subreddit.lower())
-                    data[server]['watching'] = subs
-                    await bot.say(f'Subreddit: {subreddit} added!\n'
-                                  f'You will notice this change when I scour reddit again.')
+            subs = data[sid]['watching']
+            if reddit.lower() in subs:
+                await bot.say(f'{subreddit} is already in your list!')
+                continue
+            else:
+                subs.append(reddit.lower())
+                data[sid]['watching'] = subs
+                await bot.say(f'Subreddit: {subreddit} added!\n'
+                              f'You will notice this change when I scour reddit again.')
 
-                    fmtjson.edit_json('options', data)
-                break
-    else:
-        await bot.say(f'Sorry, I can\'t reach {subreddit}. '
-                      f'Check your spelling or make sure that the reddit actually exists.')
+                fmtjson.edit_json('options', data)
+            continue
+        else:
+            await bot.say(f'Sorry, I can\'t reach {subreddit}. '
+                          f'Check your spelling or make sure that the reddit actually exists.')
+            continue
 
     commandinfo(ctx)
 
 # TODO: allow multiple reddits at a time. ex. r/unsub memes ovweratch
 @bot.command(pass_context = True, name = 'unsub')
 @admin_check()
-async def unsub(ctx, subreddit):
+async def unsub(ctx, *subreddit):
     """
     This command will 'unsubscribe' from a reddit and will no longer make posts.
     Usage: r/unsub <subreddit>
@@ -448,23 +449,19 @@ async def unsub(ctx, subreddit):
     :param subreddit:
     :return:
     """
-    for server in data:
+    for reddit in subreddit:
         sid = ctx.message.server.id
-        if str(sid) == data[server]['id']:
-            subs = data[server]['watching']
-            if subreddit in subs:
-                subs.remove(subreddit)
-                data[server]['watching'] = subs
-                await bot.say(f'Subreddit: {subreddit} removed!\n'
-                              f'You will notice this change when I scour reddit again.')
-                fmtjson.edit_json('options', data)
-                break
-
-            else:
-                await bot.say(f'Subreddit: {subreddit} not found. Please make sure you are spelling'
-                              f' it correctly.')
-                break
+        subs = data[sid]['watching']
+        if reddit in subs:
+            subs.remove(reddit)
+            data[sid]['watching'] = subs
+            await bot.say(f'Subreddit: {subreddit} removed!\n'
+                          f'You will notice this change when I scour reddit again.')
+            fmtjson.edit_json('options', data)
+            continue
         else:
+            await bot.say(f'Subreddit: {subreddit} not found. Please make sure you are spelling'
+                          f' it correctly.')
             continue
 
     commandinfo(ctx)
@@ -548,7 +545,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        bot.loop.create_task(getposts())
+        # bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
