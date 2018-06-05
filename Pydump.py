@@ -131,17 +131,7 @@ async def getposts():
                         await bot.send_message(destination, f'From r/{reddit} {image}')
                         await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
                 elif create == 1 and images:
-                    sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
-                                               server__id = data[server]['id'])
-
-                    if sendto is None:
-                        await bot.create_channel(bot.get_server(data[server]['id']),
-                                                     name=str(reddit),
-                                                     type=discord.ChannelType.text)
-                        await asyncio.sleep(5)  # sleep so that the bot has a chance to see the channel
-                        sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
-                                                   server__id = data[server]['id'])
-
+                    sendto = await createchannel(reddit, data[server]['id'])
                     await bot.send_message(sendto, '\n'.join(images))
 
         taskcomplete()
@@ -214,6 +204,19 @@ async def offremove(servers):
         for server in removed:
             data.pop(server, None)
         fmtjson.edit_json('options', data)
+
+async def createchannel(reddit, server):
+    sendto = discord.utils.get(bot.get_all_channels(), name=reddit.lower(), server__id=server)
+
+    if sendto is None:
+        await bot.create_channel(
+            bot.get_server(server), name=reddit.lower(), type=discord.ChannelType.text
+        )
+        await asyncio.sleep(5)  # sleep so that the bot has a chance to see the channel
+        sendto = discord.utils.get(
+            bot.get_all_channels(), name=reddit.lower(), server__id=server
+        )
+    return sendto
 
 # endregion
 
