@@ -339,16 +339,11 @@ async def defaultChannel(ctx, channel):
     if not newchannel:
         raise commands.CommandInvokeError
 
-    for server in data:
-        sid = ctx.message.server.id
-        if str(sid) == data[server]['id']:
-            data[server]['default_channel'] = newchannel.id
-            await bot.say(f"Default channel changed to {newchannel.mention}\n"
-                          f"You will notice this change when I scour reddit again.")
-            fmtjson.edit_json('options', data)
-            break
-        else:
-            continue
+    sid = ctx.message.server.id
+    data[sid]['default_channel'] = newchannel.id
+    await bot.say(f"Default channel changed to {newchannel.mention}\n"
+                  f"You will notice this change when I scour reddit again.")
+    fmtjson.edit_json('options', data)
 
     changedefault(ctx)
 
@@ -362,19 +357,16 @@ async def nsfwFilter(ctx):
     :param ctx:
     :return:
     '''
-    for server in data:
-        toggle = ctx.message.server.id
-        if toggle == data[server]['id']:
-            if data[server]['NSFW_filter'] == 1:
-                data[server]['NSFW_filter'] = 0
-                await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser. Also be sure"
-                              "to label your default channel or the NSFW reddit channels as NSFW channels.")
-            else:
-                data[server]['NSFW_filter'] = 1
-                await bot.say("NSFW filter has been TURNED ON. I really don't like looking for those "
-                              "images.")
-            fmtjson.edit_json('options', data)
-            break
+    sid = ctx.message.server.id
+    if data[sid]['NSFW_filter'] == 1:
+        data[sid]['NSFW_filter'] = 0
+        await bot.say("NSFW filter has been TURNED OFF. Enjoy your sinful images, loser. Also be sure"
+                      "to label your default channel or the NSFW reddit channels as NSFW channels.")
+    else:
+        data[sid]['NSFW_filter'] = 1
+        await bot.say("NSFW filter has been TURNED ON. I really don't like looking for those "
+                      "images.")
+    fmtjson.edit_json('options', data)
 
     changedefault(ctx)
 
@@ -388,19 +380,16 @@ async def createChannels(ctx):
     :param ctx:
     :return:
     '''
-    for server in data:
-        toggle = ctx.message.server.id
-        if toggle == data[server]['id']:
-            if data[server]['create_channel'] == 1:
-                data[server]['create_channel'] = 0
-                await bot.say("Creating channels has been TURNED OFF. I will now make all of my posts in "
-                              "your default channel.")
-            else:
-                data[server]['create_channel'] = 1
-                await bot.say("Creating channels has been TURNED ON. I can now create channels for each reddit "
-                              "that you are watching.")
-            fmtjson.edit_json('options', data)
-            break
+    sid = ctx.message.server.id
+    if data[sid]['create_channel'] == 1:
+        data[sid]['create_channel'] = 0
+        await bot.say("Creating channels has been TURNED OFF. I will now make all of my posts in "
+                      "your default channel.")
+    else:
+        data[sid]['create_channel'] = 1
+        await bot.say("Creating channels has been TURNED ON. I can now create channels for each reddit "
+                      "that you are watching.")
+    fmtjson.edit_json('options', data)
 
     changedefault(ctx)
 
@@ -541,19 +530,17 @@ async def listsubs(ctx):
     :param ctx:
     :return:
     """
-    for server in data:
-        sid = ctx.message.server.id
-        if str(sid) == data[server]['id']:
-            subs = data[server]['watching']
-            strsub = ''
-            if not subs:
-                await bot.say('This server isn\'t subbed to anything. Have an adminstrator type '
-                              '`r/sub <subreddit name>` to sub. EX `r/sub funny`')
-                break
-            for sub in subs:
-                strsub += f'r/{sub}\n'
+    sid = ctx.message.server.id
+    subs = data[sid]['watching']
+    strsub = ''
+    if not subs:
+        await bot.say('This server isn\'t subbed to anything. Have an adminstrator type '
+                      '`r/sub <subreddit name>` to sub. EX `r/sub funny`')
+    else:
+        for sub in subs:
+            strsub += f'r/{sub}\n'
 
-            await bot.say(f"This server is subbed to:\n{strsub}")
+        await bot.say(f"This server is subbed to:\n{strsub}")
 
     commandinfo(ctx)
 
@@ -561,7 +548,9 @@ async def listsubs(ctx):
 @bot.group(pass_context = True, name = 'about')
 async def about(ctx):
     if ctx.invoked_subcommand is None:
-        await bot.say('Sorry, you must type `r/about bot` or `r/about dev`')
+        commandinfo(ctx)
+        ctx.message.content = ctx.prefix + 'help ' + ctx.invoked_with
+        await bot.process_commands(ctx.message)
 
 @about.command(pass_context = True, name = 'bot')
 async def botabout(ctx):
