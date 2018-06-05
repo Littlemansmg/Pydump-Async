@@ -206,12 +206,17 @@ async def offjoin(servers):
 
 async def offremove(servers):
     serverlist = []
+    removed = []
     for server in servers:
         serverlist.append(server.id)
 
     for key in data:
         if not key in serverlist:
-            data.pop(key, None)
+            removed.append(key)
+
+    if removed:
+        for server in removed:
+            data.pop(server, None)
 
 # endregion
 
