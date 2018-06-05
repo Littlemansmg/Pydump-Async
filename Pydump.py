@@ -108,9 +108,9 @@ async def getposts():
                 images, nsfwimages = await appendimages(posts, now, nsfwfilter, nsfw_channel)
 
                 # This skips to next reddit.
-                if not images and not nsfwimages:
-                    await asyncio.sleep(1)
-                    break
+                # if not images and not nsfwimages:
+                #     await asyncio.sleep(1)
+                #     break
 
                 if create == 0:
                     if images:
