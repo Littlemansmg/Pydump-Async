@@ -400,7 +400,6 @@ async def showDefaults(ctx):
 # TODO: r/default all - set all defaults back to original
 # endregion
 
-# TODO: allow multiple reddits at a time. ex. r/sub overwatch discord_bots
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
 async def subscribe(ctx, *subreddit):
@@ -438,7 +437,6 @@ async def subscribe(ctx, *subreddit):
 
     commandinfo(ctx)
 
-# TODO: allow multiple reddits at a time. ex. r/unsub memes ovweratch
 @bot.command(pass_context = True, name = 'unsub')
 @admin_check()
 async def unsub(ctx, *subreddit):
@@ -468,7 +466,20 @@ async def unsub(ctx, *subreddit):
 
     commandinfo(ctx)
 
-# TODO: Command to delete all subbed reddits.
+# TODO: Test command to delete all subbed reddits.
+@bot.command(pass_context = True, name = 'removeall')
+async def removeall(ctx):
+    """
+    This command will "unsubscribe" from all reddits.
+    Usage: r/removeall
+    Permissions required: Administrator
+    :param ctx:
+    :return:
+    """
+    sid = ctx.message.server.id
+    data[sid]['watching'] = []
+    fmtjson.edit_json('options', data)
+    await bot.say('You are no longer subbed to any subreddits! Please don\'t get rid of me. :[')
 
 @bot.command(pass_context = True, name = 'listsubs')
 async def listsubs(ctx):
