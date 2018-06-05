@@ -179,6 +179,39 @@ async def respcheck(url):
         catchlog(e)
 
     return posts
+
+async def offjoin(servers):
+    for server in servers:
+        if not server.id in data.keys():
+            data.update(
+                {server.id: {
+                    'default_channel': server.owner.id,
+                    'id': server.id,
+                    'watching': [],
+                    'NSFW_filter': 1,
+                    'create_channel': 0
+                }
+                }
+            )
+            fmtjson.edit_json('options', data)
+
+            await bot.send_message(server.owner, 'Thanks for adding me to the server! There are a few things I need '
+                                                 'from you or your admins to get running though.\n'
+                                                 'In the discord server(NOT HERE),Please set the default channel for me to '
+                                                 'post in, or turn on the option for me to create a channel for each '
+                                                 'subreddit. `r/default channel general` or `r/default create`\n'
+                                                 'Right now I have the default channel set to PM you, so *I would '
+                                                 'suggest changing this*. After that, you or your admins '
+                                                 'can run `r/sub funny` and let the posts flow in!')
+
+async def offremove(servers):
+    for server in servers:
+        try:
+            temp = data[server.id]
+        except KeyError:
+            data.pop(server.id, None)
+            fmtjson.edit_json("options", data)
+
 # endregion
 
 # region -----BOT CONTENT
@@ -190,10 +223,10 @@ bot.add_check(nopms)
 @bot.event
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type r/help for help'))
-
     # TODO: run on join function here so that if the bot is off, it can still set defaults.
+    await offjoin(bot.servers)
     # TODO: run on remove function so that if the bot is off, it can remove the server.
-
+    await offremove(bot.servers)
 @bot.event
 async def on_server_join(server):
     """
@@ -237,8 +270,7 @@ async def on_server_remove(server):
     :param server:
     :return:
     """
-    data.pop(str(server.id), None)
-
+    data.pop(server.id, None)
     fmtjson.edit_json("options", data)
 
 @bot.event
@@ -400,7 +432,6 @@ async def showDefaults(ctx):
 
     changedefault(ctx)
 
-# TODO: Test r/default all - set all defaults back to original
 @setDefaults.command(pass_context = True, name = 'all')
 @admin_check()
 async def defaultall(ctx):
