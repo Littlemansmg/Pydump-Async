@@ -209,7 +209,7 @@ async def offremove():
         try:
             temp = bot.get_server(server['id'])
         except:
-            data.pop(data[server], None)
+            del data[server]
             fmtjson.edit_json("options", data)
 
 # endregion
