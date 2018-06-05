@@ -162,6 +162,7 @@ async def offjoin(servers):
             data.update(
                 {server.id: {
                     'default_channel': server.owner.id,
+                    'NSFW_channel': '',
                     'id': server.id,
                     'watching': [],
                     'NSFW_filter': 1,
@@ -259,6 +260,7 @@ async def on_server_join(server):
     data.update(
         {server.id: {
             'default_channel': server.owner.id,
+            'NSFW_channel': '',
             'id': server.id,
             'watching': [],
             'NSFW_filter': 1,
@@ -445,7 +447,7 @@ async def showDefaults(ctx):
             create = 'OFF'
         else:
             create = 'ON'
-            
+
         await bot.say(f"Default channel: {channel}\n"
                       f"Default NSFW channel: {nsfwchannel}\n"
                       f"NSFW filter: {nsfw}\n"
@@ -463,12 +465,14 @@ async def defaultall(ctx):
     """
     sid = ctx.message.server.id
     data[sid]['default_channel'] = ctx.message.server.owner.id
+    data[sid]['NSFW_channel'] = ''
     data[sid]['NSFW_filter'] = 1
     data[sid]['create_channel'] = 0
     data[sid]['watching'] = []
     fmtjson.edit_json('options', data)
     await bot.say('All options have been set to their default. Default channel is the server owner, so please use'
                   '`r/default channel <channel name>` EX.`r/default channel general`')
+
 # endregion
 
 # region -----ABOUT COMMAND GROUP
