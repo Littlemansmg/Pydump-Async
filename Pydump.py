@@ -398,7 +398,7 @@ async def showDefaults(ctx):
     changedefault(ctx)
 
 # TODO: Test r/default all - set all defaults back to original
-setDefaults.command(pass_context = True, name = 'all')
+@setDefaults.command(pass_context = True, name = 'all')
 @admin_check()
 async def defaultall(ctx):
     """
