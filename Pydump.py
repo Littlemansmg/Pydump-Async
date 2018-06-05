@@ -320,7 +320,7 @@ async def setDefaults(ctx):
     """
     if ctx.invoked_subcommand is None:
         commandinfo(ctx)
-        ctx.message.content = ctx.prefix + 'help' + ctx.invoked_with
+        ctx.message.content = ctx.prefix + 'help ' + ctx.invoked_with
         await bot.process_commands(ctx.message)
 
 @setDefaults.command(pass_context = True, name = 'channel')
