@@ -104,7 +104,6 @@ async def getposts():
                 if not posts:
                     continue
 
-                # TODO: Make functions to clean up some of this code.
                 images, nsfwimages = await appendimages(posts, now, nsfwfilter, nsfw_channel)
 
                 # This skips to next reddit.
@@ -116,7 +115,7 @@ async def getposts():
                     if images:
                         for image in images:
                             await bot.send_message(destination, f'From r/{reddit} {image}')
-                            await asyncio.sleep(1.5)  # sleep for 1 second to help prevent the ratelimit from being reached.
+                            await asyncio.sleep(1.5)  # try to prevent the ratelimit from being reached.
                     if nsfwimages:
                         for image in nsfwimages:
                             await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
@@ -309,16 +308,6 @@ async def on_command_error(error, ctx):
 # endregion
 
 # region -----COMMANDS
-@bot.command(pass_context = True, name = 'get', hidden = True)
-async def getPosts(ctx, reddit, sort):
-    """
-    I'm not sure what i'm using this command for. hidden for now.
-    :param ctx:
-    :param reddit:
-    :param sort:
-    :return:
-    """
-    pass
 
 # region -----DEFAULT COMMAND GROUP
 @bot.group(pass_context = True, name = 'default')
@@ -442,22 +431,25 @@ async def showDefaults(ctx):
     sid = ctx.message.server.id
     if sid in data.keys():
         channel = bot.get_channel(data[sid]['default_channel'])
+        nsfwchannel = bot.get_channel(data[sid]['NSFW_channel'])
+
+        if not nsfwchannel:
+            nsfwchannel = 'Nowhere'
+
         if data[sid]['NSFW_filter'] == 0:
             nsfw = 'OFF'
         else:
             nsfw = 'ON'
+
         if data[sid]['create_channel'] == 0:
             create = 'OFF'
         else:
             create = 'ON'
-        try:
-            await bot.say(f"Default channel: {channel.mention}\n"
-                    f"NSFW filter: {nsfw}\n"
-                    f"Create channels: {create}")
-        except AttributeError:
-            await bot.say(f"Default channel: Server Owner \n"
-                    f"NSFW filter: {nsfw}\n"
-                    f"Create channels: {create}")
+            
+        await bot.say(f"Default channel: {channel}\n"
+                      f"Default NSFW channel: {nsfwchannel}\n"
+                      f"NSFW filter: {nsfw}\n"
+                      f"Create channels: {create}")
 
     changedefault(ctx)
 
@@ -478,6 +470,53 @@ async def defaultall(ctx):
     await bot.say('All options have been set to their default. Default channel is the server owner, so please use'
                   '`r/default channel <channel name>` EX.`r/default channel general`')
 # endregion
+
+# region -----ABOUT COMMAND GROUP
+@bot.group(pass_context = True, name = 'about')
+async def about(ctx):
+    if ctx.invoked_subcommand is None:
+        commandinfo(ctx)
+        ctx.message.content = ctx.prefix + 'help ' + ctx.invoked_with
+        await bot.process_commands(ctx.message)
+
+@about.command(pass_context = True, name = 'bot')
+async def botabout(ctx):
+    await bot.say('```'
+                  'This is a bot developed by LittlemanSMG in python using discord.py v0.16.12\n'
+                  'I use a standard json file to store ID\'s and all the options for each server.\n'
+                  'Code is free to use/look at, following the MIT lisence at '
+                  'www.github.com/littlemansmg/pydump-rewrite \n'
+                  'Have any recommendations for/issues with the bot? Open up an Issue on github!\n'
+                  '```')
+    commandinfo(ctx)
+
+@about.command(pass_context = True, name = 'dev')
+async def devabout(ctx):
+    await bot.say('```'
+                  "I really don't feel like I need this, but here it is. I'm Scott 'LittlemanSMG' Goes, and"
+                  "I made this bot on my own, with some help from r/discord_bots discord. Originally, this bot was "
+                  "made using Praw, a reddit api wrapper, but ran into some massive blocking issues. There was so many"
+                  "issues that I had to remake the bot using aiohttp and it's a much better bot now. "
+                  "mee6 has this kind of functionality, but I didn't want to deal with all of mee6. I just wanted "
+                  "the reddit portion. The original intention was to streamline my meme consumption, but "
+                  "I realised that this bot could be used for more than just memes. All of my work is currently "
+                  "on github(www.github.com/littlemansmg. It isn't much because i'm still learning, "
+                  "but I am getting better.\n"
+                  "```")
+    commandinfo(ctx)
+# endregion
+
+# region -----OTHER COMMANDS
+@bot.command(pass_context = True, name = 'get', hidden = True)
+async def getPosts(ctx, reddit, sort):
+    """
+    I'm not sure what i'm using this command for. hidden for now.
+    :param ctx:
+    :param reddit:
+    :param sort:
+    :return:
+    """
+    pass
 
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
@@ -579,40 +618,6 @@ async def listsubs(ctx):
 
         await bot.say(f"This server is subbed to:\n{strsub}")
 
-    commandinfo(ctx)
-
-# region -----ABOUT COMMAND GROUP
-@bot.group(pass_context = True, name = 'about')
-async def about(ctx):
-    if ctx.invoked_subcommand is None:
-        commandinfo(ctx)
-        ctx.message.content = ctx.prefix + 'help ' + ctx.invoked_with
-        await bot.process_commands(ctx.message)
-
-@about.command(pass_context = True, name = 'bot')
-async def botabout(ctx):
-    await bot.say('```'
-                  'This is a bot developed by LittlemanSMG in python using discord.py v0.16.12\n'
-                  'I use a standard json file to store ID\'s and all the options for each server.\n'
-                  'Code is free to use/look at, following the MIT lisence at '
-                  'www.github.com/littlemansmg/pydump-rewrite \n'
-                  'Have any recommendations for/issues with the bot? Open up an Issue on github!\n'
-                  '```')
-    commandinfo(ctx)
-
-@about.command(pass_context = True, name = 'dev')
-async def devabout(ctx):
-    await bot.say('```'
-                  "I really don't feel like I need this, but here it is. I'm Scott 'LittlemanSMG' Goes, and"
-                  "I made this bot on my own, with some help from r/discord_bots discord. Originally, this bot was "
-                  "made using Praw, a reddit api wrapper, but ran into some massive blocking issues. There was so many"
-                  "issues that I had to remake the bot using aiohttp and it's a much better bot now. "
-                  "mee6 has this kind of functionality, but I didn't want to deal with all of mee6. I just wanted "
-                  "the reddit portion. The original intention was to streamline my meme consumption, but "
-                  "I realised that this bot could be used for more than just memes. All of my work is currently "
-                  "on github(www.github.com/littlemansmg. It isn't much because i'm still learning, "
-                  "but I am getting better.\n"
-                  "```")
     commandinfo(ctx)
 # endregion
 
