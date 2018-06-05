@@ -230,10 +230,9 @@ bot.add_check(nopms)
 @bot.event
 async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type r/help for help'))
-    # TODO: run on join function here so that if the bot is off, it can still set defaults.
     await offjoin(bot.servers)
-    # TODO: run on remove function so that if the bot is off, it can remove the server.
     await offremove(bot.servers)
+
 @bot.event
 async def on_server_join(server):
     """
