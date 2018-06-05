@@ -378,22 +378,25 @@ async def showDefaults(ctx):
     :param ctx:
     :return:
     '''
-    for server in data:
-        if ctx.message.server.id == data[server]['id']:
-            channel = bot.get_channel(data[server]['default_channel'])
-            if data[server]['NSFW_filter'] == 0:
-                nsfw = 'OFF'
-            else:
-                nsfw = 'ON'
-            if data[server]['create_channel'] == 0:
-                create = 'OFF'
-            else:
-                create = 'ON'
-
+    sid = ctx.message.server.id
+    if sid in data.keys():
+        channel = bot.get_channel(data[sid]['default_channel'])
+        if data[sid]['NSFW_filter'] == 0:
+            nsfw = 'OFF'
+        else:
+            nsfw = 'ON'
+        if data[sid]['create_channel'] == 0:
+            create = 'OFF'
+        else:
+            create = 'ON'
+        try:
             await bot.say(f"Default channel: {channel.mention}\n"
                     f"NSFW filter: {nsfw}\n"
                     f"Create channels: {create}")
-            break
+        except AttributeError:
+            await bot.say(f"Default channel: Server Owner \n"
+                    f"NSFW filter: {nsfw}\n"
+                    f"Create channels: {create}")
 
     changedefault(ctx)
 
@@ -411,6 +414,7 @@ async def defaultall(ctx):
     data[sid]['NSFW_filter'] = 1
     data[sid]['create_channel'] = 0
     data[sid]['watching'] = []
+    fmtjson.edit_json('options', data)
     await bot.say('All options have been set to their default. Default channel is the server owner, so please use'
                   '`r/default channel <channel name>` EX.`r/default channel general`')
 # endregion
