@@ -217,6 +217,7 @@ async def offremove(servers):
     if removed:
         for server in removed:
             data.pop(server, None)
+        fmtjson.edit_json('options', data)
 
 # endregion
 
