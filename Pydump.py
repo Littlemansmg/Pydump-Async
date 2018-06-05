@@ -77,14 +77,14 @@ async def getposts():
             # get default posting channel from json file
             destination = bot.get_channel(data[server]['default_channel'])
 
+            # get default nsfw channel
+            nsfw_channel = bot.get_channel(data[server]['NSFW_channel'])
+
             # reddits that the server is watching
             reddits = list(data[server]['watching'])
 
             # store nsfw filter
             nsfwfilter = data[server]['NSFW_filter']
-
-            # TODO: check NSFW channel
-            # nsfw_channel = data[server]['NSFW_channel']
 
             # store channel creation option
             create = data[server]['create_channel']
@@ -98,7 +98,6 @@ async def getposts():
                 continue
 
             for reddit in reddits:
-                images = []
                 url = f"https://www.reddit.com/r/{reddit}/new/.json"
                 posts = await respcheck(url)
 
@@ -106,30 +105,22 @@ async def getposts():
                     continue
 
                 # TODO: Make functions to clean up some of this code.
-                for x in posts:
-                    posttime = dt.utcfromtimestamp(x['created_utc'])
-                    # if 300 can't go into total seconds difference once, it gets added to the list of urls
-                    if (((now - posttime).total_seconds()) / 300) <= 1:
-                        if nsfwfilter == 1:
-                            if x['over_18'] == True:
-                                continue
-                            else:
-                                images.append(x['url'])
-                        else:
-                            # TODO: create nsfw list
-                            # if x['over_18'] == True:
-                            #     nsfwimages.append(x['url']
-                            images.append(x['url'])
+                images, nsfwimages = appendimages(posts, now, nsfwfilter, nsfw_channel)
 
-                    # This skips to next reddit.
-                    if not images:
-                        await asyncio.sleep(1)
-                        break
-
-                if create == 0 and images:
-                    for image in images:
-                        await bot.send_message(destination, f'From r/{reddit} {image}')
-                        await asyncio.sleep(1) # sleep for 1 second to help prevent the ratelimit from being reached.
+                # This skips to next reddit.
+                if not images and not nsfwimages:
+                    await asyncio.sleep(1)
+                    break
+                    
+                if create == 0:
+                    if images:
+                        for image in images:
+                            await bot.send_message(destination, f'From r/{reddit} {image}')
+                            await asyncio.sleep(1.5)  # sleep for 1 second to help prevent the ratelimit from being reached.
+                    if nsfwimages:
+                        for image in nsfwimages:
+                            await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
+                            await asyncio.sleep(1.5)
                 elif create == 1 and images:
                     sendto = await createchannel(reddit, data[server]['id'])
                     await bot.send_message(sendto, '\n'.join(images))
@@ -204,6 +195,25 @@ async def offremove(servers):
         for server in removed:
             data.pop(server, None)
         fmtjson.edit_json('options', data)
+
+async def appendimages(posts, now, nsfwfilter, nsfw_channel):
+    images = []
+    nsfwimages = []
+    for x in posts:
+        posttime = dt.utcfromtimestamp(x['created_utc'])
+        # if 300 can't go into total seconds difference once, it gets added to the list of urls
+        if (((now - posttime).total_seconds()) / 300) <= 1:
+            if nsfwfilter == 1:
+                if x['over_18'] == True:
+                    continue
+                else:
+                    images.append(x['url'])
+            elif nsfwfilter == 0:
+                if x['over_18'] == True and nsfw_channel:
+                    nsfwimages.append(x['url'])
+                    continue
+                images.append(x['url'])
+    return (images, nsfwimages)
 
 async def createchannel(reddit, server):
     sendto = discord.utils.get(bot.get_all_channels(), name=reddit.lower(), server__id=server)
@@ -344,6 +354,30 @@ async def defaultChannel(ctx, channel):
 
     sid = ctx.message.server.id
     data[sid]['default_channel'] = newchannel.id
+    await bot.say(f"Default channel changed to {newchannel.mention}\n"
+                  f"You will notice this change when I scour reddit again.")
+    fmtjson.edit_json('options', data)
+
+    changedefault(ctx)
+
+@setDefaults.command(pass_context = True, name = 'nsfwchannel')
+@admin_check()
+async def defaultChannel(ctx, channel):
+    """
+    Set the Default nsfwchannel for the bot to post in.
+    Usage: r/default nsfwchannel <channel>
+    Permissions required: Administrator
+    :param ctx:
+    :param channel:
+    :return:
+    """
+    newchannel = discord.utils.get(bot.get_all_channels(), name = channel, server__id = ctx.message.server.id)
+
+    if not newchannel:
+        raise commands.CommandInvokeError
+
+    sid = ctx.message.server.id
+    data[sid]['NSFW_channel'] = newchannel.id
     await bot.say(f"Default channel changed to {newchannel.mention}\n"
                   f"You will notice this change when I scour reddit again.")
     fmtjson.edit_json('options', data)

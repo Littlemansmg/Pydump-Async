@@ -1,9 +1,6 @@
-def test(*args):
-    testlist = args
+nan = None
 
-    for arg in args:
-        print(arg)
-
-num = 1
-
-test('i', 'like', num, 'pie')
+if nan:
+    print('none')
+else:
+    print('false')
