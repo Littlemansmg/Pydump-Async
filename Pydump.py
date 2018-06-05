@@ -204,11 +204,11 @@ async def offjoin(servers):
                                                  'suggest changing this*. After that, you or your admins '
                                                  'can run `r/sub funny` and let the posts flow in!')
 
-async def offremove(servers):
-    for server in servers:
+async def offremove():
+    for server in data:
         try:
-            temp = data[server.id]
-        except KeyError:
+            temp = bot.get_server(server['id'])
+        except:
             data.pop(server.id, None)
             fmtjson.edit_json("options", data)
 
@@ -226,7 +226,7 @@ async def on_ready():
     # TODO: run on join function here so that if the bot is off, it can still set defaults.
     await offjoin(bot.servers)
     # TODO: run on remove function so that if the bot is off, it can remove the server.
-    await offremove(bot.servers)
+    await offremove()
 @bot.event
 async def on_server_join(server):
     """
