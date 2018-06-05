@@ -397,7 +397,22 @@ async def showDefaults(ctx):
 
     changedefault(ctx)
 
-# TODO: r/default all - set all defaults back to original
+# TODO: Test r/default all - set all defaults back to original
+setDefaults.command(pass_context = True, name = 'all')
+@admin_check()
+async def defaultall(ctx):
+    """
+    This command sets all options to their default.
+    :param ctx:
+    :return:
+    """
+    sid = ctx.message.server.id
+    data[sid]['default_channel'] = ctx.message.server.owner.id
+    data[sid]['NSFW_filter'] = 1
+    data[sid]['create_channel'] = 0
+    data[sid]['watching'] = []
+    await bot.say('All options have been set to their default. Default channel is the server owner, so please use'
+                  '`r/default channel <channel name>` EX.`r/default channel general`')
 # endregion
 
 @bot.command(pass_context = True, name = 'sub')
@@ -466,7 +481,6 @@ async def unsub(ctx, *subreddit):
 
     commandinfo(ctx)
 
-# TODO: Test command to delete all subbed reddits.
 @bot.command(pass_context = True, name = 'removeall')
 async def removeall(ctx):
     """
@@ -496,7 +510,7 @@ async def listsubs(ctx):
             strsub = ''
             if not subs:
                 await bot.say('This server isn\'t subbed to anything. Have an adminstrator type '
-                              '`r/sub <subreddit name> to sub. EX `r/sub funny`')
+                              '`r/sub <subreddit name>` to sub. EX `r/sub funny`')
                 break
             for sub in subs:
                 strsub += f'r/{sub}\n'
@@ -558,7 +572,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        bot.loop.create_task(getposts())
+        # bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
