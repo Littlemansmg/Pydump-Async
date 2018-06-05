@@ -208,10 +208,10 @@ async def offremove():
     removed = []
     for server in data:
         try:
-            temp = bot.get_server(server['id'])
+            temp = bot.get_server(data[server]['id'])
         except:
             removed.append(server)
-            
+
     if removed:
         for server in removed:
             del data[server]
