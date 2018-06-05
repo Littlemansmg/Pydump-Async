@@ -205,12 +205,17 @@ async def offjoin(servers):
                                                  'can run `r/sub funny` and let the posts flow in!')
 
 async def offremove():
+    removed = []
     for server in data:
         try:
             temp = bot.get_server(server['id'])
         except:
+            removed.append(server)
+            
+    if removed:
+        for server in removed:
             del data[server]
-            fmtjson.edit_json("options", data)
+        fmtjson.edit_json("options", data)
 
 # endregion
 
