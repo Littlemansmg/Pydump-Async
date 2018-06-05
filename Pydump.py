@@ -134,15 +134,11 @@ async def getposts():
                     sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
                                                server__id = data[server]['id'])
 
-                    # If channel is not found, it applies NoneType. This statement creates the channel.
-                    # The sleep is required because if the bot goes too fast, it can't find the channel,
-                    # even though it exists.
                     if sendto is None:
                         await bot.create_channel(bot.get_server(data[server]['id']),
                                                      name=str(reddit),
                                                      type=discord.ChannelType.text)
-                        await asyncio.sleep(5)
-                        # reassign's sendto so that it is no longer NoneType
+                        await asyncio.sleep(5)  # sleep so that the bot has a chance to see the channel
                         sendto = discord.utils.get(bot.get_all_channels(), name=str.lower(str(reddit)),
                                                    server__id = data[server]['id'])
 
@@ -323,9 +319,10 @@ async def setDefaults(ctx):
     :return:
     """
     if ctx.invoked_subcommand is None:
-        await bot.say('No subcommands invoked.')
         commandinfo(ctx)
-
+        ctx.message.content = ctx.prefix + 'help' + ctx.invoked_with
+        await bot.process_command(ctx.message)
+        
 @setDefaults.command(pass_context = True, name = 'channel')
 @admin_check()
 async def defaultChannel(ctx, channel):
