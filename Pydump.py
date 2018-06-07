@@ -265,7 +265,7 @@ async def offremove(servers):
             data.pop(server, None)
         fmtjson.edit_json('options', data)
 
-async def appendimages(posts, now, delay, nsfwfilter, nsfw_channel):
+async def appendimages(posts, now, nsfwfilter, nsfw_channel):
     images = []
     nsfwimages = []
     for x in posts:
