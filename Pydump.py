@@ -10,6 +10,7 @@ import asyncio
 
 import logging
 from datetime import datetime as dt
+import datetime
 
 import aiohttp
 import discord
@@ -64,68 +65,135 @@ def nopms(ctx):
 # endregion
 
 # region -----TASKS
-async def getposts():
-    """
-    This function is the task that gets reddit posts on a 5 minute timer.
-    """
-    # wait to run task till bot is ready.
+
+async def my_background_task(server):
     await bot.wait_until_ready()
-
-    while True:
+    while not bot.is_closed:
         now = dt.utcnow()
-        for server in data:
-            # get default posting channel from json file
-            destination = bot.get_channel(data[server]['default_channel'])
+        destination = bot.get_channel(data[server]['default_channel'])
+        # get default nsfw channel
+        nsfw_channel = bot.get_channel(data[server]['NSFW_channel'])
 
-            # get default nsfw channel
-            nsfw_channel = bot.get_channel(data[server]['NSFW_channel'])
+        # reddits that the server is watching
+        reddits = list(data[server]['watching'])
 
-            # reddits that the server is watching
-            reddits = list(data[server]['watching'])
+        # store nsfw filter
+        nsfwfilter = data[server]['NSFW_filter']
 
-            # store nsfw filter
-            nsfwfilter = data[server]['NSFW_filter']
+        # store channel creation option
+        create = data[server]['create_channel']
 
-            # store channel creation option
-            create = data[server]['create_channel']
+        # get delay
+        delay = int(data[server]['delay'])
 
-            # Don't do anything if the bot can't find reddits or a destination.
-            if destination == None:
+        if destination == None:
+            asyncio.sleep(delay)
+        elif reddits == None:
+            await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
+                                                'to start getting posts!')
+            asyncio.sleep(delay)
+
+        for reddit in reddits:
+            url = f"https://www.reddit.com/r/{reddit}/new/.json"
+            posts = await respcheck(url)
+
+            if not posts:
                 continue
-            elif reddits == None:
-                await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
-                                                    'to start getting posts!')
+
+            images, nsfwimages = await appendimages(posts, now, delay, nsfwfilter, nsfw_channel)
+
+            # This skips to next reddit.
+            if not images and not nsfwimages:
+                await asyncio.sleep(1)
                 continue
 
-            for reddit in reddits:
-                url = f"https://www.reddit.com/r/{reddit}/new/.json"
-                posts = await respcheck(url)
+            if create == 0:
+                if images:
+                    for image in images:
+                        await bot.send_message(destination, f'From r/{reddit} {image}')
+                        await asyncio.sleep(1.5)  # try to prevent the ratelimit from being reached.
+                if nsfwimages:
+                    for image in nsfwimages:
+                        await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
+                        await asyncio.sleep(1.5)
+            elif create == 1 and images:
+                sendto = await createchannel(reddit, data[server]['id'])
+                await bot.send_message(sendto, '\n'.join(images))
 
-                if not posts:
-                    continue
+        await asyncio.sleep(delay)  # task runs every time delayed
 
-                images, nsfwimages = await appendimages(posts, now, nsfwfilter, nsfw_channel)
 
-                # This skips to next reddit.
-                if not images and not nsfwimages:
-                    await asyncio.sleep(1)
-                    continue
-
-                if create == 0:
-                    if images:
-                        for image in images:
-                            await bot.send_message(destination, f'From r/{reddit} {image}')
-                            await asyncio.sleep(1.5)  # try to prevent the ratelimit from being reached.
-                    if nsfwimages:
-                        for image in nsfwimages:
-                            await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
-                            await asyncio.sleep(1.5)
-                elif create == 1 and images:
-                    sendto = await createchannel(reddit, data[server]['id'])
-                    await bot.send_message(sendto, '\n'.join(images))
-
-        taskcomplete()
-        await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
+# async def getposts():
+#     """
+#     This function is the task that gets reddit posts on a 5 minute timer.
+#     """
+    # wait to run task till bot is ready.
+    # await bot.wait_until_ready()
+    #
+    # while True:
+    #     now = dt.utcnow()
+    #     for server in data:
+    #         # get default posting channel from json file
+    #         destination = bot.get_channel(data[server]['default_channel'])
+    #
+    #         # get default nsfw channel
+    #         nsfw_channel = bot.get_channel(data[server]['NSFW_channel'])
+    #
+    #         # reddits that the server is watching
+    #         reddits = list(data[server]['watching'])
+    #
+    #         # # delay for server
+    #         # delay = data[server]['delay']
+    #         #
+    #         # # post time
+    #         # sendtime = dt.utcfromtimestamp(data[server]['send_time'])
+    #
+    #         # store nsfw filter
+    #         nsfwfilter = data[server]['NSFW_filter']
+    #
+    #         # store channel creation option
+    #         create = data[server]['create_channel']
+    #
+    #         # Don't do anything if the bot can't find reddits or a destination.
+    #         if destination == None:
+    #             continue
+    #         elif reddits == None:
+    #             await bot.send_message(destination, 'I don\'t have any reddits to watch! Type `r/sub <subreddit>` '
+    #                                                 'to start getting posts!')
+    #             continue
+    #
+    #         for reddit in reddits:
+    #             url = f"https://www.reddit.com/r/{reddit}/new/.json"
+    #             posts = await respcheck(url)
+    #
+    #             if not posts:
+    #                 continue
+    #
+    #             images, nsfwimages = await appendimages(posts, now, nsfwfilter, nsfw_channel)
+    #
+    #             # This skips to next reddit.
+    #             if not images and not nsfwimages:
+    #                 await asyncio.sleep(1)
+    #                 continue
+    #
+    #             if create == 0:
+    #                 if images:
+    #                     for image in images:
+    #                         await bot.send_message(destination, f'From r/{reddit} {image}')
+    #                         await asyncio.sleep(1.5)  # try to prevent the ratelimit from being reached.
+    #                 if nsfwimages:
+    #                     for image in nsfwimages:
+    #                         await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
+    #                         await asyncio.sleep(1.5)
+    #             elif create == 1 and images:
+    #                 sendto = await createchannel(reddit, data[server]['id'])
+    #                 await bot.send_message(sendto, '\n'.join(images))
+    #
+    #         # d = datetime.timedelta(seconds=delay)
+    #         # data[server]['send_time'] = now + d
+    #
+    #     taskcomplete()
+    #     await asyncio.sleep(300) # sleep for 5 minutes before it repeats the process
 # endregion
 
 # region -----OTHER-FUNCTIONS
@@ -196,13 +264,13 @@ async def offremove(servers):
             data.pop(server, None)
         fmtjson.edit_json('options', data)
 
-async def appendimages(posts, now, nsfwfilter, nsfw_channel):
+async def appendimages(posts, now, delay, nsfwfilter, nsfw_channel):
     images = []
     nsfwimages = []
     for x in posts:
         posttime = dt.utcfromtimestamp(x['created_utc'])
         # if 300 can't go into total seconds difference once, it gets added to the list of urls
-        if (((now - posttime).total_seconds()) / 300) <= 1:
+        if (((now - posttime).total_seconds()) / delay) <= 1:
             if nsfwfilter == 1:
                 if x['over_18'] == True:
                     continue
@@ -645,7 +713,7 @@ if __name__ == '__main__':
 
     # run bot/start loop
     try:
-        bot.loop.create_task(getposts())
+        # bot.loop.create_task(getposts())
         bot.loop.run_until_complete(bot.run(token.strip()))
     except Exception as e:
         catchlog(e)
