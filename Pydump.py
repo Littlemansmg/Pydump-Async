@@ -119,7 +119,7 @@ async def my_background_task(server):
             elif create == 1 and images:
                 sendto = await createchannel(reddit, data[server]['id'])
                 await bot.send_message(sendto, '\n'.join(images))
-        
+
         taskcomplete()
         await asyncio.sleep(delay)  # task runs every time delayed
 
@@ -310,6 +310,9 @@ async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type r/help for help'))
     await offjoin(bot.servers)
     await offremove(bot.servers)
+
+    for server in bot.servers:
+        asyncio.ensure_future(my_background_task(server)
 
 @bot.event
 async def on_server_join(server):
