@@ -311,8 +311,8 @@ async def on_ready():
     await offjoin(bot.servers)
     await offremove(bot.servers)
 
-    # for server in bot.servers:
-    #     asyncio.ensure_future(my_background_task(server.id))
+    for server in bot.servers:
+        asyncio.ensure_future(my_background_task(server.id))
 
 @bot.event
 async def on_server_join(server):
