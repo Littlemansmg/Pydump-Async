@@ -119,7 +119,8 @@ async def my_background_task(server):
             elif create == 1 and images:
                 sendto = await createchannel(reddit, data[server]['id'])
                 await bot.send_message(sendto, '\n'.join(images))
-
+        
+        taskcomplete()
         await asyncio.sleep(delay)  # task runs every time delayed
 
 
