@@ -68,7 +68,7 @@ def nopms(ctx):
 
 async def my_background_task(server):
     await bot.wait_until_ready()
-    while not bot.is_closed:
+    while not bot.is_closed and server in data.keys():
         now = dt.utcnow()
         destination = bot.get_channel(data[server]['default_channel'])
         # get default nsfw channel
@@ -311,8 +311,8 @@ async def on_ready():
     await offjoin(bot.servers)
     await offremove(bot.servers)
 
-    for server in bot.servers:
-        asyncio.ensure_future(my_background_task(server.id))
+    # for server in bot.servers:
+    #     asyncio.ensure_future(my_background_task(server.id))
 
 @bot.event
 async def on_server_join(server):
