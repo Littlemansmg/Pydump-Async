@@ -386,20 +386,30 @@ async def defaultChannel(ctx, channel):
 @setDefaults.command(pass_context = True, name = 'delay')
 @admin_check()
 async def defaulttime(ctx, time):
+    sid = ctx.message.server.id
     if time == '5m':
-        pass
+        data[sid]['delay'] = 300
+        await bot.say(f'The delay has changed to {time}.')
     elif time == '10m':
-        pass
+        data[sid]['delay'] = 600
+        await bot.say(f'The delay has changed to {time}.')
     elif time == '15m':
-        pass
+        data[sid]['delay'] = 900
+        await bot.say(f'The delay has changed to {time}.')
     elif time == '30m':
-        pass
+        data[sid]['delay'] = 1800
+        await bot.say(f'The delay has changed to {time}.')
     elif time == '45m':
-        pass
+        data[sid]['delay'] = 2700
+        await bot.say(f'The delay has changed to {time}.')
     elif time == '1h':
-        pass
+        data[sid]['delay'] = 3600
+        await bot.say(f'The delay has changed to {time}.')
     else:
         await bot.say('Sorry time must be 5m/10m/15m/30m/45m/1h')
+
+    fmtjson.edit_json('options', data)
+    commandinfo(ctx)
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
 @admin_check()
