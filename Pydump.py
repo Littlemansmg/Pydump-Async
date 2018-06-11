@@ -69,7 +69,7 @@ def nopms(ctx):
 async def my_background_task(server):
     while not bot.is_closed and server in data.keys():
         delay = data[server]['delay']
-        getposts(server, delay)
+        await getposts(server, delay)
         await asyncio.sleep(delay)
 
 async def getposts(server, delay):
