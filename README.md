@@ -3,7 +3,7 @@ This bot is built to follow subreddits and send posts to a discord server.
 It has various options like a nsfw filter and different viewing options 
 
 ## Getting Started
-The bot is almost good enough for myself, then I need to make sure that I can seperate the NSFW content and create nsfw channels (just to be safe). 5/31/18
+Bot is nearly complete, I just need to get a working url working for it. 
 
 ## Current Functionality
 * Bot can access Reddit's json object of a subreddit.
@@ -24,6 +24,9 @@ The bot is almost good enough for myself, then I need to make sure that I can se
   * Set valid subreddits to 'subscribe' to
     * List of reddits for the bot to check for post from
     * Defaulted to an empty list
+  * Set default delay inbetween posts
+    * Time (in seconds) how often the bot posts.
+    * Defaulted to 5 minutes
 * Bot can add/remove a server with set defaults with no user interaction
 * All major commands i.e. sub, unsub, toggle nsfw/create are admin only commands
 
@@ -31,16 +34,10 @@ The bot is almost good enough for myself, then I need to make sure that I can se
 *This list is in no particular order.*
 * Add more options. (planned below)
   * default sort
-  * default time to get posts (1min/5min/10min etc.)
-    * This includes changing the sleep time so that it runs at the proper times
-  * default nsfw channel
-    * This also includes setting the channel to NSFW
   * Allow suggestions / suggestion channel
   * More to come as I think about them
 * Set up role based checks. 
   * Ex. Instead of just admins, let people with x role use the command.
-* Suggestion command for subreddits
-* About the bot info
 
 ## Built With
 * [Discord.py](https://github.com/Rapptz/discord.py) - Discord API wrapper to run a discord bot in Python.
