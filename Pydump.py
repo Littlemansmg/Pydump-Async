@@ -38,10 +38,10 @@ def changedefault(ctx):
                  f'Author_id: {ctx.message.author.id} '
                  f'Invoke: {ctx.message.content}')
 
-def taskcomplete():
+def taskcomplete(server):
     # log when the task finishes
     now = dt.now().strftime('%m/%d %H:%M')
-    logging.info(f'{now} Task completed successfully!')
+    logging.info(f'{now} Task completed successfully for {server}')
 
 def catchlog(exception):
     # General log for exceptions
@@ -70,6 +70,7 @@ async def my_background_task(server):
     while not bot.is_closed and server in data.keys():
         delay = data[server]['delay']
         await getposts(server, delay)
+        taskcomplete(server)
         await asyncio.sleep(delay)
 
 async def getposts(server, delay):
@@ -106,6 +107,7 @@ async def getposts(server, delay):
         posts = await respcheck(url)
 
         if not posts:
+            await bot.send_message("Sorry I can't reach reddit. Can you check if www.reddit.com is up for me?")
             continue
 
         images, nsfwimages = await appendimages(posts, now, delay, nsfwfilter, nsfw_channel)
@@ -127,11 +129,6 @@ async def getposts(server, delay):
         elif create == 1 and images:
             sendto = await createchannel(reddit, data[server]['id'])
             await bot.send_message(sendto, '\n'.join(images))
-
-    # d = datetime.timedelta(seconds=delay)
-    # data[server]['send_time'] = now + d
-
-    taskcomplete()
 # endregion
 
 # region -----OTHER-FUNCTIONS
@@ -157,8 +154,8 @@ async def respcheck(url):
                     # puts each post into a dict that can be manipulated
                     posts = list(map(lambda p: p['data'], posts))
 
-    except Exception as e:
-        catchlog(e)
+    except Exception:
+        catchlog("Can't get to reddit. Probably 503 error.")
 
     return posts
 
@@ -386,6 +383,24 @@ async def defaultChannel(ctx, channel):
     fmtjson.edit_json('options', data)
 
     changedefault(ctx)
+
+@setDefaults.comand(pass_context = True, name = 'delay')
+@admin_check()
+async def defaulttime(ctx, time):
+    if time == '5m':
+        pass
+    elif time == '10m':
+        pass
+    elif time == '15m':
+        pass
+    elif time == '30m':
+        pass
+    elif time == '45m':
+        pass
+    elif time == '1h':
+        pass
+    else:
+        await bot.say('Sorry time must be 5m/10m/15m/30m/45m/1h')
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
 @admin_check()
