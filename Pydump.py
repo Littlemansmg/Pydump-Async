@@ -271,7 +271,7 @@ async def appendimages(posts, now, nsfwfilter, nsfw_channel):
     for x in posts:
         posttime = dt.utcfromtimestamp(x['created_utc'])
         # if 300 can't go into total seconds difference once, it gets added to the list of urls
-        if (((now - posttime).total_seconds()) / delay) <= 1:
+        if (((now - posttime).total_seconds()) / 300) <= 1:
             if nsfwfilter == 1:
                 if x['over_18'] == True:
                     continue
