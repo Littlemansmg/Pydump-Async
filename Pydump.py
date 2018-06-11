@@ -289,6 +289,7 @@ async def on_server_join(server):
                                          'Right now I have the default channel set to PM you, so *I would '
                                          'suggest changing this*. After that, you or your admins '
                                          'can run `r/sub funny` and let the posts flow in!')
+    asyncio.ensure_future(my_background_task(server.id))
 
 @bot.event
 async def on_server_remove(server):
