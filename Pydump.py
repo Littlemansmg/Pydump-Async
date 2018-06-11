@@ -10,7 +10,6 @@ import asyncio
 
 import logging
 from datetime import datetime as dt
-import datetime
 
 import aiohttp
 import discord
@@ -23,7 +22,7 @@ import fmtjson
 
 # region -----LOGS
 def commandinfo(ctx):
-    # log when a command it used
+    # log when a command it's used
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} COMMAND USED; '
                  f'Server_id: {ctx.message.server.id} '
@@ -39,7 +38,7 @@ def changedefault(ctx):
                  f'Invoke: {ctx.message.content}')
 
 def taskcomplete(server):
-    # log when the task finishes
+    # log when the task finishes for a server
     now = dt.now().strftime('%m/%d %H:%M')
     logging.info(f'{now} Task completed successfully for {server}')
 
@@ -67,17 +66,28 @@ def nopms(ctx):
 # region -----TASKS
 
 async def my_background_task(server):
+    """
+    This task creates a seperate loop for each server it's connected to.
+    :param server:
+    :return:
+    """
     while not bot.is_closed and server in data.keys():
         delay = data[server]['delay']
         await getposts(server, delay)
         taskcomplete(server)
         await asyncio.sleep(delay)
 
+# endregion
+
+# region -----OTHER-FUNCTIONS
 async def getposts(server, delay):
     """
-    This function is the task that gets reddit posts on a 5 minute timer.
+    This function retrieves posts and then sends them to where they need to go per discord server
+    Usage: my_background_task - called in a loop
+    :param server:
+    :param delay:
+    :return:
     """
-    # wait to run task till bot is ready.
     now = dt.utcnow()
     # get default posting channel from json file
     destination = bot.get_channel(data[server]['default_channel'])
@@ -106,17 +116,19 @@ async def getposts(server, delay):
         url = f"https://www.reddit.com/r/{reddit}/new/.json"
         posts = await respcheck(url)
 
+        # If no posts found, skip to next reddit.
         if not posts:
             continue
 
         images, nsfwimages = await appendimages(posts, now, delay, nsfwfilter, nsfw_channel)
 
-        # This skips to next reddit.
+        # This skips to next reddit if no posts are new enough.
         if not images and not nsfwimages:
             await asyncio.sleep(1)
             continue
 
         if create == 0:
+            # send to default channels respectively
             if images:
                 for image in images:
                     await bot.send_message(destination, f'From r/{reddit} {image}')
@@ -126,11 +138,10 @@ async def getposts(server, delay):
                     await bot.send_message(nsfw_channel, f'From r/{reddit} {image}')
                     await asyncio.sleep(1.5)
         elif create == 1 and images:
+            # send to channels labled for reddits
             sendto = await createchannel(reddit, data[server]['id'])
             await bot.send_message(sendto, '\n'.join(images))
-# endregion
 
-# region -----OTHER-FUNCTIONS
 async def respcheck(url):
     """
     This function is used to open up the json file from reddit and get the posts.
@@ -159,6 +170,11 @@ async def respcheck(url):
     return posts
 
 async def offjoin(servers):
+    """
+    This is for if the bot is offline and joins a server.
+    :param servers:
+    :return:
+    """
     for server in servers:
         if not server.id in data.keys():
             data.update(
@@ -185,6 +201,11 @@ async def offjoin(servers):
                                                  'can run `r/sub funny` and let the posts flow in!')
 
 async def offremove(servers):
+    """
+    This is for if the bot gets kicked while offline
+    :param servers:
+    :return:
+    """
     serverlist = []
     removed = []
     for server in servers:
@@ -200,11 +221,20 @@ async def offremove(servers):
         fmtjson.edit_json('options', data)
 
 async def appendimages(posts, now, delay, nsfwfilter, nsfw_channel):
+    """
+    Get and return posts.
+    :param posts:
+    :param now:
+    :param delay:
+    :param nsfwfilter:
+    :param nsfw_channel:
+    :return:
+    """
     images = []
     nsfwimages = []
     for x in posts:
         posttime = dt.utcfromtimestamp(x['created_utc'])
-        # if 300 can't go into total seconds difference once, it gets added to the list of urls
+        # if {delay} can't go into total seconds difference once, it gets added to the list of urls
         if (((now - posttime).total_seconds()) / delay) <= 1:
             if nsfwfilter == 1:
                 if x['over_18'] == True:
@@ -219,6 +249,12 @@ async def appendimages(posts, now, delay, nsfwfilter, nsfw_channel):
     return (images, nsfwimages)
 
 async def createchannel(reddit, server):
+    """
+    Function for creating a channel for each subbed reddit
+    :param reddit:
+    :param server:
+    :return:
+    """
     sendto = discord.utils.get(bot.get_all_channels(), name=reddit.lower(), server__id=server)
 
     if sendto is None:
@@ -230,7 +266,6 @@ async def createchannel(reddit, server):
             bot.get_all_channels(), name=reddit.lower(), server__id=server
         )
     return sendto
-
 # endregion
 
 # region -----BOT CONTENT
@@ -244,7 +279,7 @@ async def on_ready():
     await bot.change_presence(game=discord.Game(name='Type r/help for help'))
     await offjoin(bot.servers)
     await offremove(bot.servers)
-
+    # create tasks for each server connected.
     for server in bot.servers:
         asyncio.ensure_future(my_background_task(server.id))
 
@@ -252,10 +287,11 @@ async def on_ready():
 async def on_server_join(server):
     """
     When the bot joins a server, it will set defaults in the json file and pull all info it needs.
-
     defaults:
         default channel == 'server owner'
+        nsfw channel == ''
         id == server id
+        delay == 300 (5 minutes)
         nsfw filter == 1
         create channel == 0
         watching == []
@@ -268,15 +304,16 @@ async def on_server_join(server):
             'default_channel': server.owner.id,
             'NSFW_channel': '',
             'id': server.id,
-            'watching': [],
+            'delay': 300,
             'NSFW_filter': 1,
             'create_channel': 0,
-            'delay': 300
+            'watching': []
             }
         }
     )
     fmtjson.edit_json('options', data)
 
+    # message owner about bot usage.
     await bot.send_message(server.owner, 'Thanks for adding me to the server! There are a few things I need '
                                          'from you or your admins to get running though.\n'
                                          'In the discord server(NOT HERE),Please set the default channel for me to '
@@ -285,6 +322,8 @@ async def on_server_join(server):
                                          'Right now I have the default channel set to PM you, so *I would '
                                          'suggest changing this*. After that, you or your admins '
                                          'can run `r/sub funny` and let the posts flow in!')
+
+    # create new task for the server
     asyncio.ensure_future(my_background_task(server.id))
 
 @bot.event
@@ -377,7 +416,7 @@ async def defaultChannel(ctx, channel):
 
     sid = ctx.message.server.id
     data[sid]['NSFW_channel'] = newchannel.id
-    await bot.say(f"Default channel changed to {newchannel.mention}\n"
+    await bot.say(f"NSFW default channel changed to {newchannel.mention}\n"
                   f"You will notice this change when I scour reddit again.")
     fmtjson.edit_json('options', data)
 
@@ -386,6 +425,16 @@ async def defaultChannel(ctx, channel):
 @setDefaults.command(pass_context = True, name = 'delay')
 @admin_check()
 async def defaulttime(ctx, time):
+    """
+    This command sets the delay of when the bot should post. It will only get 25 posts max, but some reddits are slow
+    TIMES MUST BE: 5m/10m/15m/30m/45m/1h
+    I have an upper limit of an hour because if it gets more than 25 posts, that would take a very long time.
+    Usage: r/default delay 10m
+    Permissions required: Administrator
+    :param ctx:
+    :param time:
+    :return:
+    """
     sid = ctx.message.server.id
     if time == '5m':
         data[sid]['delay'] = 300
@@ -409,7 +458,7 @@ async def defaulttime(ctx, time):
         await bot.say('Sorry time must be 5m/10m/15m/30m/45m/1h')
 
     fmtjson.edit_json('options', data)
-    commandinfo(ctx)
+    changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'nsfw')
 @admin_check()
@@ -458,7 +507,6 @@ async def createChannels(ctx):
     changedefault(ctx)
 
 @setDefaults.command(pass_context = True, name = 'show')
-@admin_check()
 async def showDefaults(ctx):
     '''
     This command will show all defaults for the server.
@@ -474,6 +522,8 @@ async def showDefaults(ctx):
         if not nsfwchannel:
             nsfwchannel = 'Nowhere'
 
+        delay = data[sid]['delay']
+
         if data[sid]['NSFW_filter'] == 0:
             nsfw = 'OFF'
         else:
@@ -486,6 +536,7 @@ async def showDefaults(ctx):
 
         await bot.say(f"Default channel: {channel}\n"
                       f"Default NSFW channel: {nsfwchannel}\n"
+                      f"Delay between posting: {delay} Seconds\n"
                       f"NSFW filter: {nsfw}\n"
                       f"Create channels: {create}")
 
@@ -496,12 +547,15 @@ async def showDefaults(ctx):
 async def defaultall(ctx):
     """
     This command sets all options to their default.
+    Usage: r/default all
+    Permissions required: Administrator
     :param ctx:
     :return:
     """
     sid = ctx.message.server.id
     data[sid]['default_channel'] = ctx.message.server.owner.id
     data[sid]['NSFW_channel'] = ''
+    data[sid]['delay'] = 300
     data[sid]['NSFW_filter'] = 1
     data[sid]['create_channel'] = 0
     data[sid]['watching'] = []
@@ -514,6 +568,11 @@ async def defaultall(ctx):
 # region -----ABOUT COMMAND GROUP
 @bot.group(pass_context = True, name = 'about')
 async def about(ctx):
+    """
+    Base command for all about commands.
+    :param ctx:
+    :return:
+    """
     if ctx.invoked_subcommand is None:
         commandinfo(ctx)
         ctx.message.content = ctx.prefix + 'help ' + ctx.invoked_with
@@ -521,6 +580,12 @@ async def about(ctx):
 
 @about.command(pass_context = True, name = 'bot')
 async def botabout(ctx):
+    """
+    About the bot.
+    Usage r/about bot
+    :param ctx:
+    :return:
+    """
     await bot.say('```'
                   'This is a bot developed by LittlemanSMG in python using discord.py v0.16.12\n'
                   'I use a standard json file to store ID\'s and all the options for each server.\n'
@@ -532,31 +597,27 @@ async def botabout(ctx):
 
 @about.command(pass_context = True, name = 'dev')
 async def devabout(ctx):
+    """
+    About the Developer
+    Usage: r/about dev
+    :param ctx:
+    :return:
+    """
     await bot.say('```'
                   "I really don't feel like I need this, but here it is. I'm Scott 'LittlemanSMG' Goes, and"
-                  "I made this bot on my own, with some help from r/discord_bots discord. Originally, this bot was "
+                  "I made this bot, with some help from the r/discord_bots discord. Originally, this bot was "
                   "made using Praw, a reddit api wrapper, but ran into some massive blocking issues. There was so many"
                   "issues that I had to remake the bot using aiohttp and it's a much better bot now. "
                   "mee6 has this kind of functionality, but I didn't want to deal with all of mee6. I just wanted "
                   "the reddit portion. The original intention was to streamline my meme consumption, but "
                   "I realised that this bot could be used for more than just memes. All of my work is currently "
-                  "on github(www.github.com/littlemansmg. It isn't much because i'm still learning, "
+                  "on github(www.github.com/littlemansmg). It isn't much because i'm still learning, "
                   "but I am getting better.\n"
                   "```")
     commandinfo(ctx)
 # endregion
 
 # region -----OTHER COMMANDS
-@bot.command(pass_context = True, name = 'get', hidden = True)
-async def getPosts(ctx, reddit, sort):
-    """
-    I'm not sure what i'm using this command for. hidden for now.
-    :param ctx:
-    :param reddit:
-    :param sort:
-    :return:
-    """
-    pass
 
 @bot.command(pass_context = True, name = 'sub')
 @admin_check()
@@ -564,6 +625,7 @@ async def subscribe(ctx, *subreddit):
     """
     This command will 'subscribe' to a reddit and will make posts from it.
     Usage: r/sub <subreddit>
+    Ex. r/sub news funny husky
     Permissions required: Administrator
     :param ctx:
     :param subreddit:
@@ -601,6 +663,7 @@ async def unsub(ctx, *subreddit):
     """
     This command will 'unsubscribe' from a reddit and will no longer make posts.
     Usage: r/unsub <subreddit>
+    Ex. r/unsub news funny husky
     Permissions required: Administrator
     :param ctx:
     :param subreddit:
