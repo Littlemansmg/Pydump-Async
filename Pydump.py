@@ -384,7 +384,7 @@ async def defaultChannel(ctx, channel):
 
     changedefault(ctx)
 
-@setDefaults.comand(pass_context = True, name = 'delay')
+@setDefaults.command(pass_context = True, name = 'delay')
 @admin_check()
 async def defaulttime(ctx, time):
     if time == '5m':
