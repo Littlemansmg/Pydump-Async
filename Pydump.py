@@ -107,7 +107,6 @@ async def getposts(server, delay):
         posts = await respcheck(url)
 
         if not posts:
-            await bot.send_message("Sorry I can't reach reddit. Can you check if www.reddit.com is up for me?")
             continue
 
         images, nsfwimages = await appendimages(posts, now, delay, nsfwfilter, nsfw_channel)
