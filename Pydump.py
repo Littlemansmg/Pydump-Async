@@ -73,9 +73,16 @@ async def my_background_task(server):
     """
     while not bot.is_closed and server in data.keys():
         delay = data[server]['delay']
-        await getposts(server, delay)
-        taskcomplete(server)
-        await asyncio.sleep(delay)
+        try:
+            await getposts(server, delay)
+            taskcomplete(server)
+            await asyncio.sleep(delay)
+        except discord.HTTPException:
+            task = asyncio.Task.current_task()
+            task.cancel()
+            restart_task(server)
+
+
 
 # endregion
 
@@ -266,6 +273,9 @@ async def createchannel(reddit, server):
             bot.get_all_channels(), name=reddit.lower(), server__id=server
         )
     return sendto
+
+async def restart_task(sid):
+    asyncio.ensure_future(my_background_task(sid))
 # endregion
 
 # region -----BOT CONTENT
