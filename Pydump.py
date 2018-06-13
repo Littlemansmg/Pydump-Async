@@ -71,7 +71,8 @@ async def my_background_task(server):
     :param server:
     :return:
     """
-    while not bot.is_closed and server in data.keys():
+    # while not bot.is_closed and server in data.keys():
+    while True:
         delay = data[server]['delay']
         try:
             await getposts(server, delay)
@@ -732,6 +733,11 @@ async def listsubs(ctx):
         await bot.say(f"This server is subbed to:\n{strsub}")
 
     commandinfo(ctx)
+
+@bot.command(pass_context = True, name = 'fuckmeupfam', hidden = True)
+@admin_check()
+async def fuckmeupfam(ctx):
+    await bot.close()
 # endregion
 
 # endregion
