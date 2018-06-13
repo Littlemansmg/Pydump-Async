@@ -751,7 +751,7 @@ if __name__ == '__main__':
 
     # Start Logging
     logging.basicConfig(handlers=[logging.FileHandler('discord.log', 'a', 'utf-8')],
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 
     try:
         data = fmtjson.read_json('options')
