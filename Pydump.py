@@ -71,8 +71,7 @@ async def my_background_task(server):
     :param server:
     :return:
     """
-    # while not bot.is_closed and server in data.keys():
-    while True:
+    while not bot.is_closed and server in data.keys():
         delay = data[server]['delay']
         try:
             await getposts(server, delay)
@@ -734,7 +733,7 @@ async def listsubs(ctx):
 
     commandinfo(ctx)
 
-@bot.command(pass_context = True, name = 'fuckmeupfam', hidden = True)
+@bot.command(pass_context = True, name = 'fuckmeupfam', hidden = True, disabled = True)
 @admin_check()
 async def fuckmeupfam(ctx):
     await bot.close()
@@ -752,7 +751,8 @@ if __name__ == '__main__':
 
     # Start Logging
     logging.basicConfig(handlers=[logging.FileHandler('discord.log', 'a', 'utf-8')],
-                        level=logging.INFO)
+                        level=logging.DEBUG)
+
     try:
         data = fmtjson.read_json('options')
     except Exception as e:
