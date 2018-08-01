@@ -1,4 +1,4 @@
-# Pydump-Rewrite
+# Pydump-Async
 This bot is built to follow subreddits and send posts to a discord server.
 It has various options like a nsfw filter and different viewing options 
 
